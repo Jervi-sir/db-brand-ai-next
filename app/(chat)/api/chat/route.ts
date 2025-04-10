@@ -132,9 +132,9 @@ export async function POST(request: Request) {
                   }],
                 }));
                
-                await saveMessages({ messages: sanitizedResponseMessages });
+                await saveMessages({ messages: sanitizedResponseMessages as any });
                 // Insert into OpenAiApiUsage
-                await db.insert(openAiApiUsage).values({
+                await (db.insert(openAiApiUsage) as any).values({
                   id: generateUUID(), // Generate a new UUID
                   chatId: id,
                   model: modelDetails.name,

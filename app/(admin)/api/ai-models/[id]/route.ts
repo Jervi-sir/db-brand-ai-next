@@ -26,14 +26,15 @@ export async function PUT(request: Request) {
 }
 
 
-export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+export async function DELETE(request: Request) {
   const session = await auth();
   if (!session || !session.user) return new Response('Unauthorized', { status: 401 });
 
   try {
+    const data = await request.json();
     const [deletedModel] = await db
       .delete(aiModel)
-      .where(eq(aiModel.id, params.id))
+      .where(eq(aiModel.id, data.id))
       .returning();
     if (!deletedModel) return new Response('Model not found', { status: 404 });
     return new Response(null, { status: 204 });
