@@ -54,7 +54,7 @@ function PureMultimodalInput({
   setAttachments?: Dispatch<SetStateAction<Array<Attachment>>>;
   messages: Array<Message>;
   setMessages: Dispatch<SetStateAction<Array<Message>>>;
-  append: UseChatHelpers['append'];
+  append?: UseChatHelpers['append'];
   handleSubmit: UseChatHelpers['handleSubmit'];
   className?: string;
 }) {
@@ -191,7 +191,7 @@ function PureMultimodalInput({
       {messages.length === 0 &&
         (attachments && attachments.length === 0) &&
         uploadQueue.length === 0 && (
-          <SuggestedActions append={append} chatId={chatId} />
+          append && <SuggestedActions append={append} chatId={chatId} />
         )}
 
       <input

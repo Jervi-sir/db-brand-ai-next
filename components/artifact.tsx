@@ -77,7 +77,7 @@ function PureArtifact({
   messages: Array<Message>;
   setMessages: Dispatch<SetStateAction<Array<Message>>>;
   votes?: Array<Vote> | undefined;
-  append: UseChatHelpers['append'];
+  append?: UseChatHelpers['append'];
   handleSubmit: UseChatHelpers['handleSubmit'];
   reload: UseChatHelpers['reload'];
   isReadonly: boolean;
@@ -472,7 +472,7 @@ function PureArtifact({
                   <Toolbar
                     isToolbarVisible={isToolbarVisible}
                     setIsToolbarVisible={setIsToolbarVisible}
-                    append={append}
+                    // append={append}
                     status={status}
                     stop={stop}
                     setMessages={setMessages}

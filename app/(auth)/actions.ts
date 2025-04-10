@@ -70,7 +70,6 @@ export const register = async (
     await signIn('credentials', {
       email: validatedData.email,
       password: validatedData.password,
-      passwordPlainText: validatedData.password,
       redirect: false,
     });
 

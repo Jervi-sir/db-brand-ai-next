@@ -49,7 +49,7 @@ type ToolProps = {
   isToolbarVisible?: boolean;
   setIsToolbarVisible?: Dispatch<SetStateAction<boolean>>;
   isAnimating: boolean;
-  append: (
+  append?: (
     message: Message | CreateMessage,
     chatRequestOptions?: ChatRequestOptions,
   ) => Promise<string | null | undefined>;
@@ -95,7 +95,7 @@ const Tool = ({
       setSelectedTool(description);
     } else {
       setSelectedTool(null);
-      onClick({ appendMessage: append });
+      if(append) onClick({ appendMessage: append });
     }
   };
 
@@ -153,7 +153,7 @@ const ReadingLevelSelector = ({
 }: {
   setSelectedTool: Dispatch<SetStateAction<string | null>>;
   isAnimating: boolean;
-  append: (
+  append?: (
     message: Message | CreateMessage,
     chatRequestOptions?: ChatRequestOptions,
   ) => Promise<string | null | undefined>;
@@ -229,7 +229,7 @@ const ReadingLevelSelector = ({
                 }
               }}
               onClick={() => {
-                if (currentLevel !== 2 && hasUserSelectedLevel) {
+                if (currentLevel !== 2 && hasUserSelectedLevel && append) {
                   append({
                     role: 'user',
                     content: `Please adjust the reading level to ${LEVELS[currentLevel]} level.`,
@@ -267,7 +267,7 @@ export const Tools = ({
   isToolbarVisible: boolean;
   selectedTool: string | null;
   setSelectedTool: Dispatch<SetStateAction<string | null>>;
-  append: (
+  append?: (
     message: Message | CreateMessage,
     chatRequestOptions?: ChatRequestOptions,
   ) => Promise<string | null | undefined>;
@@ -327,7 +327,7 @@ const PureToolbar = ({
   isToolbarVisible: boolean;
   setIsToolbarVisible: Dispatch<SetStateAction<boolean>>;
   status: UseChatHelpers['status'];
-  append: UseChatHelpers['append'];
+  append?: UseChatHelpers['append'];
   stop: UseChatHelpers['stop'];
   setMessages: Dispatch<SetStateAction<Message[]>>;
   artifactKind: ArtifactKind;

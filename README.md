@@ -54,4 +54,4 @@ This template ships with OpenAI `gpt-4o` as the default. However, with the [AI S
 
 1. `pnpm run build`
 2. `npx next run -p 3001`
-3. or use `pm2 start npm --name "dr-brandlin-ai" -- start`
+3. or use `pm2 start npm --name "dr-ai" -- start`

@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import Link from 'next/link';
 
 import { MessageIcon, VercelIcon } from './icons';
+import { InstagramIcon } from 'lucide-react';
 
 export const Overview = () => {
   return (
@@ -17,34 +18,19 @@ export const Overview = () => {
         <p className="flex flex-row justify-center gap-4 items-center">
           <VercelIcon size={32} />
           <span>+</span>
-          <MessageIcon size={32} />
+          <InstagramIcon size={32} />
         </p>
         <p>
-          This is an{' '}
-          <Link
-            className="font-medium underline underline-offset-4"
-            href="https://github.com/vercel/ai-chatbot"
-            target="_blank"
-          >
-            open source
-          </Link>{' '}
-          chatbot template built with Next.js and the AI SDK by Vercel. It uses
-          the{' '}
-          <code className="rounded-md bg-muted px-1 py-0.5">streamText</code>{' '}
-          function in the server and the{' '}
-          <code className="rounded-md bg-muted px-1 py-0.5">useChat</code> hook
-          on the client to create a seamless chat experience.
+          مرحبا! أنا د. براند، خبير في صناعة محتوى إنستغرام يجذب الجزايريين 🇩🇿. نساعدك تبني محتوى فيه الهوك والتشويق يخلي الناس تقول &quot;هذا أنا!&quot; وتشير لصحابها.
         </p>
         <p>
-          You can learn more about the AI SDK by visiting the{' '}
+          سواء كنت صاحب بيزنس، فودي، ولا تحب السفر، عندنا أفكار تجيب ملاين المشاهدات! ابدأ دز بروفايلك وخلينا نطلعو ليك فولوورز.
           <Link
             className="font-medium underline underline-offset-4"
-            href="https://sdk.vercel.ai/docs"
-            target="_blank"
+            href="/get-started"
           >
-            docs
+            جرب الآن
           </Link>
-          .
         </p>
       </div>
     </motion.div>
