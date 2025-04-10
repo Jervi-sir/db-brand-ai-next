@@ -73,9 +73,28 @@ export async function POST(request: Request) {
     const chat = await getChatById({ id });
 
     if (!chat) {
-      const title = await generateTitleFromUserMessage({
+      const startTime = performance.now();
+      const { title, usage } = await generateTitleFromUserMessage({
         message: userMessage,
       });
+      const endTime = performance.now();
+      const duration = (endTime - startTime) / 1000; // Convert ms to seconds
+
+      try {
+        await (db.insert(openAiApiUsage) as any).values({
+          id: generateUUID(),
+          chatId: id || null, 
+          model: 'gpt-4o-mini', 
+          type: 'title-generation',
+          promptTokens: usage?.promptTokens || 0,
+          completionTokens: usage?.completionTokens || 0,
+          totalTokens: usage?.totalTokens || (usage?.promptTokens || 0) + (usage?.completionTokens || 0),
+          duration: duration || null,
+          completedAt: new Date(),
+        });
+      } catch (error) {
+        console.error('Failed to save token usage for title generation:', error);
+      }
 
       await saveChat({ id, userId: session.user.id, title });
     } else {
