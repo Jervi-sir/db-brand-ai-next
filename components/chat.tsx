@@ -46,11 +46,9 @@ export function Chat({
     experimental_throttle: 100,
     sendExtraMessageFields: true,
     generateId: generateUUID,
-    onResponse: (response) => {
-      console.log('response: ', response)
-    },
     onFinish: ({ id, annotations }, { usage }) => {
       // Update the specific message with usage data
+      // console.log('annotations: ', annotations)
       setMessages((prevMessages: any[]) =>
         prevMessages.map((msg) =>
           msg.id === id
@@ -59,7 +57,7 @@ export function Chat({
               promptTokens: usage?.promptTokens || null,
               completionTokens: usage?.completionTokens || null,
               totalTokens: usage?.totalTokens || null,
-              // duration: annotations[0].duration || null
+              duration: (annotations as any)?.[0]?.duration || null
             }
             : msg
         )
@@ -126,8 +124,8 @@ export function Chat({
         handleSubmit={handleSubmit}
         status={status}
         stop={stop}
-        attachments={attachments}
-        setAttachments={setAttachments}
+        // attachments={attachments}
+        // setAttachments={setAttachments}
         append={append}
         messages={messages}
         setMessages={setMessages}

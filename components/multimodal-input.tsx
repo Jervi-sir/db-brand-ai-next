@@ -50,8 +50,8 @@ function PureMultimodalInput({
   setInput: UseChatHelpers['setInput'];
   status: UseChatHelpers['status'];
   stop: () => void;
-  attachments: Array<Attachment>;
-  setAttachments: Dispatch<SetStateAction<Array<Attachment>>>;
+  attachments?: Array<Attachment>;
+  setAttachments?: Dispatch<SetStateAction<Array<Attachment>>>;
   messages: Array<Message>;
   setMessages: Dispatch<SetStateAction<Array<Message>>>;
   append: UseChatHelpers['append'];
@@ -117,7 +117,7 @@ function PureMultimodalInput({
       experimental_attachments: attachments,
     });
 
-    setAttachments([]);
+    if (setAttachments) setAttachments([]);
     setLocalStorageInput('');
     resetHeight();
 
@@ -173,7 +173,7 @@ function PureMultimodalInput({
           (attachment) => attachment !== undefined,
         );
 
-        setAttachments((currentAttachments) => [
+        if (setAttachments) setAttachments((currentAttachments) => [
           ...currentAttachments,
           ...successfullyUploadedAttachments,
         ]);
@@ -189,7 +189,7 @@ function PureMultimodalInput({
   return (
     <div className="relative w-full flex flex-col gap-4">
       {messages.length === 0 &&
-        attachments.length === 0 &&
+        (attachments && attachments.length === 0) &&
         uploadQueue.length === 0 && (
           <SuggestedActions append={append} chatId={chatId} />
         )}
@@ -203,12 +203,12 @@ function PureMultimodalInput({
         tabIndex={-1}
       />
 
-      {(attachments.length > 0 || uploadQueue.length > 0) && (
+      {((attachments && attachments.length > 0) || uploadQueue.length > 0) && (
         <div
           data-testid="attachments-preview"
           className="flex flex-row gap-2 overflow-x-scroll items-end"
         >
-          {attachments.map((attachment) => (
+          {attachments?.map((attachment) => (
             <PreviewAttachment key={attachment.url} attachment={attachment} />
           ))}
 
@@ -255,9 +255,12 @@ function PureMultimodalInput({
         }}
       />
 
-      <div className="absolute bottom-0 p-2 w-fit flex flex-row justify-start">
-        <AttachmentsButton fileInputRef={fileInputRef} status={status} />
-      </div>
+      {setAttachments
+        &&
+        <div className="absolute bottom-0 p-2 w-fit flex flex-row justify-start">
+          <AttachmentsButton fileInputRef={fileInputRef} status={status} />
+        </div>
+      }
 
       <div className="absolute bottom-0 right-0 p-2 w-fit flex flex-row justify-end">
         {status === 'submitted' ? (

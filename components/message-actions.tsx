@@ -36,8 +36,6 @@ export function PureMessageActions({
   if (message.toolInvocations && message.toolInvocations.length > 0)
     return null;
 
-
-  console.log('message-acton: ', message)
   return (
     <TooltipProvider delayDuration={0}>
       <div className="flex flex-row gap-2">
@@ -63,7 +61,6 @@ export function PureMessageActions({
             <small>Completion: {message.completionTokens || 0}</small>
             <small>Total: {message.totalTokens || 0}</small>
             <small>Duration: {Number(message.duration || 0).toFixed(2)}s</small>
-            <small>Duration: { message.annotations?.[0]?.duration }</small>
           </div>
         {/* )} */}
 

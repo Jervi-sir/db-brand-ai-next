@@ -21,8 +21,6 @@ export const chat = pgTable('Chat', {
 
   threadId: varchar('threadId', { length: 64 }), // Nullable
   deletedAt: timestamp('deletedAt'), // Nullable
-
-
 });
 
 export type Chat = InferSelectModel<typeof chat>;
@@ -33,7 +31,7 @@ export const message = pgTable('Message', {
   role: varchar('role').notNull(),
   content: json('content').notNull(),
   createdAt: timestamp('createdAt').notNull(),
-
+  annotations: json('annotations').default(null),
   model: varchar('model', { length: 64 }).default('gpt-4o-mini'),
   promptTokens: integer('promptTokens'), // Nullable
   completionTokens: integer('completionTokens'), // Nullable
@@ -120,7 +118,7 @@ export type Suggestion = InferSelectModel<typeof suggestion>;
 */
 export const openAiApiUsage = pgTable('OpenAiApiUsage', {
   id: uuid('id').primaryKey().notNull().defaultRandom(),
-  chatId: uuid('chatId').notNull().references(() => chat.id),
+  chatId: uuid('chatId').notNull().references(() => chat.id).references(() => chat.id, { onDelete: 'cascade' }), // Add cascade,
   model: varchar('model', { length: 64 }).notNull(),
   type: varchar('type', { length: 64 }).notNull(),
   promptTokens: integer('promptTokens').notNull(),

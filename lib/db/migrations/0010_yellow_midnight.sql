@@ -1,0 +1,1 @@
+ALTER TABLE "Message" ADD COLUMN "annotations" json NOT NULL;

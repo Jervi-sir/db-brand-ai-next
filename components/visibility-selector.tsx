@@ -9,7 +9,6 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
-
 import {
   CheckCircleFillIcon,
   ChevronDownIcon,
@@ -44,9 +43,11 @@ export function VisibilitySelector({
   chatId,
   className,
   selectedVisibilityType,
+  handleOnSelected, // New optional prop
 }: {
   chatId: string;
   selectedVisibilityType: VisibilityType;
+  handleOnSelected?: (visibility: VisibilityType) => void; // Callback type
 } & React.ComponentProps<typeof Button>) {
   const [open, setOpen] = useState(false);
 
@@ -60,6 +61,14 @@ export function VisibilitySelector({
     [visibilityType],
   );
 
+  const handleSelect = (visibilityId: VisibilityType) => {
+    setVisibilityType(visibilityId); // Update internal state
+    if (handleOnSelected) {
+      handleOnSelected(visibilityId); // Call parent callback if provided
+    }
+    setOpen(false); // Close dropdown
+  };
+
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger
@@ -69,10 +78,7 @@ export function VisibilitySelector({
           className,
         )}
       >
-        <Button
-          variant="outline"
-          className="hidden md:flex md:px-2 md:h-[34px]"
-        >
+        <Button variant="outline" className="hidden md:flex md:px-2 md:h-[34px]">
           {selectedVisibility?.icon}
           {selectedVisibility?.label}
           <ChevronDownIcon />
@@ -83,10 +89,7 @@ export function VisibilitySelector({
         {visibilities.map((visibility) => (
           <DropdownMenuItem
             key={visibility.id}
-            onSelect={() => {
-              setVisibilityType(visibility.id);
-              setOpen(false);
-            }}
+            onSelect={() => handleSelect(visibility.id)} // Use new handler
             className="gap-4 group/item flex flex-row justify-between items-center"
             data-active={visibility.id === visibilityType}
           >

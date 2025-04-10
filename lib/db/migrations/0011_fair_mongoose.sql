@@ -1,0 +1,1 @@
+ALTER TABLE "Message" ALTER COLUMN "annotations" DROP NOT NULL;

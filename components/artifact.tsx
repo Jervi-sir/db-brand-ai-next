@@ -72,8 +72,8 @@ function PureArtifact({
   setInput: UseChatHelpers['setInput'];
   status: UseChatHelpers['status'];
   stop: UseChatHelpers['stop'];
-  attachments: Array<Attachment>;
-  setAttachments: Dispatch<SetStateAction<Array<Attachment>>>;
+  attachments?: Array<Attachment>;
+  setAttachments?: Dispatch<SetStateAction<Array<Attachment>>>;
   messages: Array<Message>;
   setMessages: Dispatch<SetStateAction<Array<Message>>>;
   votes?: Array<Vote> | undefined;
@@ -329,8 +329,8 @@ function PureArtifact({
                     handleSubmit={handleSubmit}
                     status={status}
                     stop={stop}
-                    attachments={attachments}
-                    setAttachments={setAttachments}
+                    // attachments={attachments}
+                    // setAttachments={setAttachments}
                     messages={messages}
                     append={append}
                     className="bg-background dark:bg-muted"

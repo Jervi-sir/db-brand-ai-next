@@ -37,7 +37,6 @@ export default function ModelsDashboard() {
       apiKey: formData.get("apiKey") as string,
       capabilities: formData.get("capabilities") as string,
     };
-    console.log("New Model Data:", modelData);
     // Add logic to save to your database (e.g., API call)
   };
 

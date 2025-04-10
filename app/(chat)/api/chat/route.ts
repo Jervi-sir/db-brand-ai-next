@@ -131,9 +131,8 @@ export async function POST(request: Request) {
                     totalTokens: usage?.totalTokens || null,
                   }],
                 }));
-
+               
                 await saveMessages({ messages: sanitizedResponseMessages });
-
                 // Insert into OpenAiApiUsage
                 await db.insert(openAiApiUsage).values({
                   id: generateUUID(), // Generate a new UUID
@@ -145,6 +144,13 @@ export async function POST(request: Request) {
                   totalTokens: usage?.totalTokens || (usage?.promptTokens || 0) + (usage?.completionTokens || 0), // Calculate if not provided
                   duration: duration as number || null,
                   completedAt: new Date(),
+                });
+
+                dataStream.writeMessageAnnotation({
+                  duration, // Add duration to annotations
+                  promptTokens: usage?.promptTokens || null,
+                  completionTokens: usage?.completionTokens || null,
+                  totalTokens: usage?.totalTokens || null,
                 });
 
               } catch (error) {
@@ -159,6 +165,7 @@ export async function POST(request: Request) {
         });
 
         result.consumeStream();
+
 
         result.mergeIntoDataStream(dataStream, {
           sendReasoning: true,
@@ -201,6 +208,11 @@ export async function DELETE(request: Request) {
 
     return new Response('Chat deleted', { status: 200 });
   } catch (error) {
+    console.error('Error processing DELETE request', {
+      id,
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+    });
     return new Response('An error occurred while processing your request', {
       status: 500,
     });

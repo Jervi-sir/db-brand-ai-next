@@ -301,7 +301,7 @@ function FormData({ model, onModelUpdate, setSelectedModel }: any) {
               name="customPrompts"
               value={formData?.customPrompts || ''}
               onChange={handleInputChange}
-              className="col-span-3"
+              className="col-span-3 h-full min-h-36"
               disabled={!isEditing}
             />
           </div>

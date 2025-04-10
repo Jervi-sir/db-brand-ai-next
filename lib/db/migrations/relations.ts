@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm/relations";
-import { user, suggestion, document, chat, message, vote } from "./schema";
+import { user, suggestion, document, chat, message, openAiApiUsage, subscriptionPlan, subscriptionModel, aiModel, vote, userSubscription } from "./schema";
 
 export const suggestionRelations = relations(suggestion, ({one}) => ({
 	user: one(user, {
@@ -15,6 +15,7 @@ export const suggestionRelations = relations(suggestion, ({one}) => ({
 export const userRelations = relations(user, ({many}) => ({
 	suggestions: many(suggestion),
 	chats: many(chat),
+	userSubscriptions: many(userSubscription),
 	documents: many(document),
 }));
 
@@ -40,7 +41,35 @@ export const chatRelations = relations(chat, ({one, many}) => ({
 		fields: [chat.userId],
 		references: [user.id]
 	}),
+	openAiApiUsages: many(openAiApiUsage),
 	votes: many(vote),
+}));
+
+export const openAiApiUsageRelations = relations(openAiApiUsage, ({one}) => ({
+	chat: one(chat, {
+		fields: [openAiApiUsage.chatId],
+		references: [chat.id]
+	}),
+}));
+
+export const subscriptionModelRelations = relations(subscriptionModel, ({one}) => ({
+	subscriptionPlan: one(subscriptionPlan, {
+		fields: [subscriptionModel.subscriptionPlanId],
+		references: [subscriptionPlan.id]
+	}),
+	aiModel: one(aiModel, {
+		fields: [subscriptionModel.aiModelId],
+		references: [aiModel.id]
+	}),
+}));
+
+export const subscriptionPlanRelations = relations(subscriptionPlan, ({many}) => ({
+	subscriptionModels: many(subscriptionModel),
+	userSubscriptions: many(userSubscription),
+}));
+
+export const aiModelRelations = relations(aiModel, ({many}) => ({
+	subscriptionModels: many(subscriptionModel),
 }));
 
 export const voteRelations = relations(vote, ({one}) => ({
@@ -51,5 +80,16 @@ export const voteRelations = relations(vote, ({one}) => ({
 	message: one(message, {
 		fields: [vote.messageId],
 		references: [message.id]
+	}),
+}));
+
+export const userSubscriptionRelations = relations(userSubscription, ({one}) => ({
+	user: one(user, {
+		fields: [userSubscription.userId],
+		references: [user.id]
+	}),
+	subscriptionPlan: one(subscriptionPlan, {
+		fields: [userSubscription.subscriptionPlanId],
+		references: [subscriptionPlan.id]
 	}),
 }));
