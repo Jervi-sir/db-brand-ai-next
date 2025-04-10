@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { BookOpen, Bot, Command, Frame, LifeBuoy, Map, PieChart, Send, Settings2, SquareTerminal, } from "lucide-react"
+import { BookOpen, Bot, Command, Frame, LifeBuoy, LogOut, Map, PieChart, Send, Settings2, SquareTerminal, TowerControlIcon, X, } from "lucide-react"
 
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, useSidebar, } from "@/components/ui/sidebar"
 import { ChevronRight, type LucideIcon } from "lucide-react"
@@ -22,23 +22,31 @@ const data = {
       title: "Models",
       url: "/dashboard/models",
       icon: Bot,
-    
+
     },
     {
-      title: "Documentation",
-      url: "#",
-      icon: BookOpen,
-    
+      title: "Ai Usage",
+      url: "/dashboard/ai-usage",
+      icon: TowerControlIcon,
+
     },
     {
-      title: "Settings",
-      url: "#",
+      title: "Ai Settings",
+      url: "/dashboard/ai-settings",
       icon: Settings2,
-     
+
     },
   ],
-  
+
+  navBottom: [
+    {
+      title: "Exit Dashboard",
+      url: "/",
+      icon: X,
+    },
+  ]
 }
+
 
 export function AppSidebarAdmin({ user }: { user: User | undefined }) {
   const router = useRouter();
@@ -64,9 +72,10 @@ export function AppSidebarAdmin({ user }: { user: User | undefined }) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
+        <NavMain label={'Platform'} items={data.navMain} />
       </SidebarContent>
       <SidebarFooter>
+        <NavMain items={data.navBottom} />
         {user && <SidebarUserNav user={user} />}
       </SidebarFooter>
     </Sidebar>
@@ -75,8 +84,10 @@ export function AppSidebarAdmin({ user }: { user: User | undefined }) {
 
 
 export function NavMain({
+  label,
   items,
 }: {
+  label?: string,
   items: {
     title: string
     url: string
@@ -87,7 +98,10 @@ export function NavMain({
   const pathname = usePathname()
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>Platform</SidebarGroupLabel>
+      { label
+        &&
+        <SidebarGroupLabel>{label}</SidebarGroupLabel>
+      }
       <SidebarMenu>
         {items.map((item) => (
           <SidebarMenuItem key={item.title} className={pathname === item.url ? 'bg-neutral-950 rounded-lg' : 'rounded-lg'}>

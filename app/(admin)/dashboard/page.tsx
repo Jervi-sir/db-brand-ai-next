@@ -4,7 +4,7 @@ import { Separator } from "@/components/ui/separator"
 import {
   SidebarTrigger,
 } from "@/components/ui/sidebar"
-import { auth } from "../(auth)/auth";
+import { auth } from "../../(auth)/auth";
 import { cookies } from "next/headers";
 
 export default async function Page(props: { params: Promise<{ id: string }> }) {

@@ -1,7 +1,7 @@
+// components/ModelSelector.tsx
 'use client';
 
-import { startTransition, useMemo, useOptimistic, useState } from 'react';
-
+import { startTransition, useMemo, useOptimistic, useState, useEffect } from 'react';
 import { saveChatModelAsCookie } from '@/app/(chat)/actions';
 import { Button } from '@/components/ui/button';
 import {
@@ -10,9 +10,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { chatModels } from '@/lib/ai/models';
 import { cn } from '@/lib/utils';
-
 import { CheckCircleFillIcon, ChevronDownIcon } from './icons';
 
 export function ModelSelector({
@@ -22,13 +20,36 @@ export function ModelSelector({
   selectedModelId: string;
 } & React.ComponentProps<typeof Button>) {
   const [open, setOpen] = useState(false);
-  const [optimisticModelId, setOptimisticModelId] =
-    useOptimistic(selectedModelId);
+  const [optimisticModelId, setOptimisticModelId] = useOptimistic(selectedModelId);
+  const [models, setModels] = useState<{ id: string; name: string; description: string }[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const selectedChatModel = useMemo(
-    () => chatModels.find((chatModel) => chatModel.id === optimisticModelId),
-    [optimisticModelId],
+  // Fetch models from API
+  useEffect(() => {
+    const fetchModels = async () => {
+      setLoading(true);
+      try {
+        const response = await fetch('/api/ai-models', { credentials: 'include' });
+        if (!response.ok) throw new Error('Failed to fetch models');
+        const data = await response.json();
+        setModels(data);
+      } catch (error) {
+        console.error('Error fetching models:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchModels();
+  }, []);
+
+  const selectedChatModel: any = useMemo(
+    () => models.find((chatModel) => chatModel.id === optimisticModelId),
+    [optimisticModelId, models],
   );
+
+  if (loading) {
+    return <Button variant="outline" disabled>Loading models...</Button>;
+  }
 
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
@@ -44,47 +65,49 @@ export function ModelSelector({
           variant="outline"
           className="md:px-2 md:h-[34px]"
         >
-          {selectedChatModel?.name}
+          {selectedChatModel?.displayName || selectedChatModel?.name || 'Select Model'}
           <ChevronDownIcon />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="min-w-[300px]">
-        {chatModels.map((chatModel) => {
-          const { id } = chatModel;
+        {models.length === 0 ? (
+          <DropdownMenuItem disabled>No models available</DropdownMenuItem>
+        ) : (
+          models.map((chatModel: any) => {
+            const { id } = chatModel;
 
-          return (
-            <DropdownMenuItem
-              data-testid={`model-selector-item-${id}`}
-              key={id}
-              onSelect={() => {
-                setOpen(false);
-
-                startTransition(() => {
-                  setOptimisticModelId(id);
-                  saveChatModelAsCookie(id);
-                });
-              }}
-              data-active={id === optimisticModelId}
-              asChild
-            >
-              <button
-                type="button"
-                className="gap-4 group/item flex flex-row justify-between items-center w-full"
+            return (
+              <DropdownMenuItem
+                data-testid={`model-selector-item-${id}`}
+                key={id}
+                onSelect={() => {
+                  setOpen(false);
+                  startTransition(() => {
+                    setOptimisticModelId(id);
+                    saveChatModelAsCookie(id);
+                  });
+                }}
+                data-active={id === optimisticModelId}
+                asChild
               >
-                <div className="flex flex-col gap-1 items-start">
-                  <div>{chatModel.name}</div>
-                  <div className="text-xs text-muted-foreground">
-                    {chatModel.description}
+                <button
+                  type="button"
+                  className="gap-4 group/item flex flex-row justify-between items-center w-full"
+                >
+                  <div className="flex flex-col gap-1 items-start">
+                    <div>{chatModel.displayName || chatModel.name}</div>
+                    <div className="text-xs text-muted-foreground">
+                      {chatModel.description || 'No description available'}
+                    </div>
                   </div>
-                </div>
-
-                <div className="text-foreground dark:text-foreground opacity-0 group-data-[active=true]/item:opacity-100">
-                  <CheckCircleFillIcon />
-                </div>
-              </button>
-            </DropdownMenuItem>
-          );
-        })}
+                  <div className="text-foreground dark:text-foreground opacity-0 group-data-[active=true]/item:opacity-100">
+                    <CheckCircleFillIcon />
+                  </div>
+                </button>
+              </DropdownMenuItem>
+            );
+          })
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   );

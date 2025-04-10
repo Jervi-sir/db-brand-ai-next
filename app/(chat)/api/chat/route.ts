@@ -8,6 +8,7 @@ import {
 import { auth } from '@/app/(auth)/auth';
 import { systemPrompt } from '@/lib/ai/prompts';
 import {
+  db,
   deleteChatById,
   getChatById,
   saveChat,
@@ -19,13 +20,12 @@ import {
   sanitizeResponseMessages,
 } from '@/lib/utils';
 import { generateTitleFromUserMessage } from '../../actions';
-import { createDocument } from '@/lib/ai/tools/create-document';
-import { updateDocument } from '@/lib/ai/tools/update-document';
-import { requestSuggestions } from '@/lib/ai/tools/request-suggestions';
-import { getWeather } from '@/lib/ai/tools/get-weather';
 import { isProductionEnvironment } from '@/lib/constants';
 import { NextResponse } from 'next/server';
 import { myProvider } from '@/lib/ai/providers';
+import { aiModel, openAiApiUsage } from '@/lib/db/schema';
+import { eq } from 'drizzle-orm';
+import { openai } from '@ai-sdk/openai';
 
 export const maxDuration = 60;
 
@@ -34,11 +34,11 @@ export async function POST(request: Request) {
     const {
       id,
       messages,
-      selectedChatModel,
+      selectedChatModelID,
     }: {
       id: string;
       messages: Array<Message>;
-      selectedChatModel: string;
+      selectedChatModelID: string;
     } = await request.json();
 
     const session = await auth();
@@ -51,6 +51,23 @@ export async function POST(request: Request) {
 
     if (!userMessage) {
       return new Response('No user message found', { status: 400 });
+    }
+
+    // Retrieve the AIModel by ID
+    const [modelDetails] = await db
+      .select({
+        name: aiModel.name,
+        endpoint: aiModel.endpoint,
+        apiKey: aiModel.apiKey,
+        capability: aiModel.capability,
+        customPrompts: aiModel.customPrompts,
+      })
+      .from(aiModel)
+      .where(eq(aiModel.id, selectedChatModelID))
+      .limit(1);
+
+    if (!modelDetails) {
+      return new Response('Selected model not found', { status: 404 });
     }
 
     const chat = await getChatById({ id });
@@ -67,56 +84,69 @@ export async function POST(request: Request) {
       }
     }
 
+    // Save the user message with initial fields
     await saveMessages({
-      messages: [{ ...userMessage, createdAt: new Date(), chatId: id }],
+      messages: [{
+        ...userMessage,
+        createdAt: new Date(),
+        chatId: id,
+        model: modelDetails.name, // Set the model used
+      } as any],
     });
 
     return createDataStreamResponse({
       execute: (dataStream) => {
+        // Start timing
+        const startTime = performance.now();
         const result = streamText({
-          model: myProvider.languageModel(selectedChatModel),
-          system: systemPrompt({ selectedChatModel }),
-          messages,
-          maxSteps: 5,
-          experimental_activeTools:
-            selectedChatModel === 'chat-model-reasoning'
-              ? []
-              : [
-                  'getWeather',
-                  'createDocument',
-                  'updateDocument',
-                  'requestSuggestions',
-                ],
-          experimental_transform: smoothStream({ chunking: 'word' }),
-          experimental_generateMessageId: generateUUID,
-          tools: {
-            getWeather,
-            createDocument: createDocument({ session, dataStream }),
-            updateDocument: updateDocument({ session, dataStream }),
-            requestSuggestions: requestSuggestions({
-              session,
-              dataStream,
-            }),
-          },
-          onFinish: async ({ response, reasoning }) => {
+          model: openai(modelDetails.name),//myProvider.languageModel(selectedChatModel),
+          system: modelDetails.customPrompts || undefined,//systemPrompt({ selectedChatModel }),
+          messages: [userMessage],
+          maxSteps: 1,
+          onFinish: async ({ response, reasoning, usage }) => {
             if (session.user?.id) {
               try {
+                // Calculate duration in seconds
+                const endTime = performance.now();
+                const duration = (endTime - startTime) / 1000; // Convert ms to seconds
+
                 const sanitizedResponseMessages = sanitizeResponseMessages({
                   messages: response.messages,
                   reasoning,
+                }).map((message) => ({
+                  // ...message,
+                  chatId: id,
+                  role: message.role,
+                  content: message.content,
+                  createdAt: new Date(),
+                  model: modelDetails.name, // Set the model used
+                  promptTokens: usage?.promptTokens || null, // From provider
+                  completionTokens: usage?.completionTokens || null, // From provider
+                  totalTokens: usage?.totalTokens || null, // From provider
+                  duration: duration || null, // Optional: track duration if available
+                  annotations: [{
+                    duration, // Add duration to annotations
+                    promptTokens: usage?.promptTokens || null,
+                    completionTokens: usage?.completionTokens || null,
+                    totalTokens: usage?.totalTokens || null,
+                  }],
+                }));
+
+                await saveMessages({ messages: sanitizedResponseMessages });
+
+                // Insert into OpenAiApiUsage
+                await db.insert(openAiApiUsage).values({
+                  id: generateUUID(), // Generate a new UUID
+                  chatId: id,
+                  model: modelDetails.name,
+                  type: 'chat', // Define type (e.g., 'chat', 'tool'); adjust as needed
+                  promptTokens: usage?.promptTokens || 0, // Default to 0 if not provided
+                  completionTokens: usage?.completionTokens || 0, // Default to 0 if not provided
+                  totalTokens: usage?.totalTokens || (usage?.promptTokens || 0) + (usage?.completionTokens || 0), // Calculate if not provided
+                  duration: duration as number || null,
+                  completedAt: new Date(),
                 });
 
-                await saveMessages({
-                  messages: sanitizedResponseMessages.map((message) => {
-                    return {
-                      id: message.id,
-                      chatId: id,
-                      role: message.role,
-                      content: message.content,
-                      createdAt: new Date(),
-                    };
-                  }),
-                });
               } catch (error) {
                 console.error('Failed to save chat');
               }
@@ -132,7 +162,10 @@ export async function POST(request: Request) {
 
         result.mergeIntoDataStream(dataStream, {
           sendReasoning: true,
+          sendUsage: true,
         });
+
+        // return NextResponse.json({ result }, { status: 200 });
       },
       onError: () => {
         return 'Oops, an error occured!';

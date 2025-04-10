@@ -1,5 +1,5 @@
-import type { Message } from 'ai';
-import { useSWRConfig } from 'swr';
+'use client'
+// import { useSWRConfig } from 'swr';
 import { useCopyToClipboard } from 'usehooks-ts';
 
 import type { Vote } from '@/lib/db/schema';
@@ -12,9 +12,10 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from './ui/tooltip';
-import { memo } from 'react';
+import { memo, useEffect } from 'react';
 import equal from 'fast-deep-equal';
 import { toast } from 'sonner';
+import { Message } from '@/lib/utils';
 
 export function PureMessageActions({
   chatId,
@@ -27,7 +28,7 @@ export function PureMessageActions({
   vote: Vote | undefined;
   isLoading: boolean;
 }) {
-  const { mutate } = useSWRConfig();
+  // const { mutate } = useSWRConfig();
   const [_, copyToClipboard] = useCopyToClipboard();
 
   if (isLoading) return null;
@@ -35,6 +36,8 @@ export function PureMessageActions({
   if (message.toolInvocations && message.toolInvocations.length > 0)
     return null;
 
+
+  console.log('message-acton: ', message)
   return (
     <TooltipProvider delayDuration={0}>
       <div className="flex flex-row gap-2">
@@ -54,7 +57,17 @@ export function PureMessageActions({
           <TooltipContent>Copy</TooltipContent>
         </Tooltip>
 
-        <Tooltip>
+        {/* {(message.promptTokens || message.completionTokens || message.totalTokens || message.duration) && ( */}
+          <div className="mt-1 flex flex-row gap-3 text-xs text-gray-500">
+            <small>Prompt: {message.promptTokens || 0}</small>
+            <small>Completion: {message.completionTokens || 0}</small>
+            <small>Total: {message.totalTokens || 0}</small>
+            <small>Duration: {Number(message.duration || 0).toFixed(2)}s</small>
+            <small>Duration: { message.annotations?.[0]?.duration }</small>
+          </div>
+        {/* )} */}
+
+        {/* <Tooltip>
           <TooltipTrigger asChild>
             <Button
               data-testid="message-upvote"
@@ -158,7 +171,7 @@ export function PureMessageActions({
             </Button>
           </TooltipTrigger>
           <TooltipContent>Downvote Response</TooltipContent>
-        </Tooltip>
+        </Tooltip> */}
       </div>
     </TooltipProvider>
   );

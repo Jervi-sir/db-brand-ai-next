@@ -1,7 +1,8 @@
 import type {
+  Attachment,
   CoreAssistantMessage,
   CoreToolMessage,
-  Message,
+  JSONValue,
   TextStreamPart,
   ToolInvocation,
   ToolSet,
@@ -85,6 +86,26 @@ function addToolMessageToChat({
   });
 }
 
+export interface Message {
+  id: string;
+  createdAt?: Date;
+  content: string;
+  reasoning?: string;
+  experimental_attachments?: Attachment[];
+  role: 'system' | 'user' | 'assistant' | 'data';
+  data?: JSONValue;
+  annotations?: JSONValue[] | undefined;
+  toolInvocations?: Array<ToolInvocation>;
+  parts?: any;
+
+  model?: string,
+  promptTokens?: number,
+  completionTokens?: number,
+  totalTokens?: number,
+  duration?: number,
+}
+
+
 export function convertToUIMessages(
   messages: Array<DBMessage>,
 ): Array<Message> {
@@ -125,6 +146,11 @@ export function convertToUIMessages(
       content: textContent,
       reasoning,
       toolInvocations,
+      model: message.model as any || null,
+      promptTokens: message.promptTokens as any || null,
+      completionTokens: message.completionTokens as any || null,
+      totalTokens: message.totalTokens as any || null,
+      duration: message.duration as any || null,
     });
 
     return chatMessages;

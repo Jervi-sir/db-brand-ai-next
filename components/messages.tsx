@@ -1,16 +1,17 @@
-import { Message } from 'ai';
+'use client'
 import { PreviewMessage, ThinkingMessage } from './message';
 import { useScrollToBottom } from './use-scroll-to-bottom';
 import { Overview } from './overview';
-import { memo } from 'react';
+import { memo, useEffect } from 'react';
 import { Vote } from '@/lib/db/schema';
 import equal from 'fast-deep-equal';
 import { UseChatHelpers } from '@ai-sdk/react';
+import { Message } from '@/lib/utils';
 
 interface MessagesProps {
   chatId: string;
   status: UseChatHelpers['status'];
-  votes: Array<Vote> | undefined;
+  votes?: Array<Vote> | undefined;
   messages: Array<Message>;
   setMessages: UseChatHelpers['setMessages'];
   reload: UseChatHelpers['reload'];

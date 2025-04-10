@@ -1,9 +1,9 @@
 'use client';
 
-import type { ChatRequestOptions, Message } from 'ai';
+import type { ChatRequestOptions } from 'ai';
 import cx from 'classnames';
 import { AnimatePresence, motion } from 'framer-motion';
-import { memo, useState } from 'react';
+import { memo, useEffect, useState } from 'react';
 import type { Vote } from '@/lib/db/schema';
 import { DocumentToolCall, DocumentToolResult } from './document';
 import { PencilEditIcon, SparklesIcon } from './icons';
@@ -12,7 +12,7 @@ import { MessageActions } from './message-actions';
 import { PreviewAttachment } from './preview-attachment';
 import { Weather } from './weather';
 import equal from 'fast-deep-equal';
-import { cn } from '@/lib/utils';
+import { cn, Message } from '@/lib/utils';
 import { Button } from './ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 import { MessageEditor } from './message-editor';
@@ -69,7 +69,7 @@ const PurePreviewMessage = ({
           )}
 
           <div className="flex flex-col gap-4 w-full">
-            {message.experimental_attachments && (
+            {/* {message.experimental_attachments && (
               <div
                 data-testid={`message-attachments`}
                 className="flex flex-row justify-end gap-2"
@@ -81,21 +81,21 @@ const PurePreviewMessage = ({
                   />
                 ))}
               </div>
-            )}
+            )} */}
 
-            {message.reasoning && (
+            {/* {message.reasoning && (
               <MessageReasoning
                 isLoading={isLoading}
                 reasoning={message.reasoning}
               />
-            )}
+            )} */}
 
             {(message.content || message.reasoning) && mode === 'view' && (
               <div
                 data-testid="message-content"
                 className="flex flex-row gap-2 items-start"
               >
-                {message.role === 'user' && !isReadonly && (
+                {/* {message.role === 'user' && !isReadonly && (
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Button
@@ -111,7 +111,7 @@ const PurePreviewMessage = ({
                     </TooltipTrigger>
                     <TooltipContent>Edit message</TooltipContent>
                   </Tooltip>
-                )}
+                )} */}
 
                 <div
                   className={cn('flex flex-col gap-4', {
@@ -124,7 +124,7 @@ const PurePreviewMessage = ({
               </div>
             )}
 
-            {message.content && mode === 'edit' && (
+            {/* {message.content && mode === 'edit' && (
               <div className="flex flex-row gap-2 items-start">
                 <div className="size-8" />
 
@@ -136,9 +136,9 @@ const PurePreviewMessage = ({
                   reload={reload}
                 />
               </div>
-            )}
+            )} */}
 
-            {message.toolInvocations && message.toolInvocations.length > 0 && (
+            {/* {message.toolInvocations && message.toolInvocations.length > 0 && (
               <div className="flex flex-col gap-4">
                 {message.toolInvocations.map((toolInvocation) => {
                   const { toolName, toolCallId, state, args } = toolInvocation;
@@ -201,7 +201,7 @@ const PurePreviewMessage = ({
                   );
                 })}
               </div>
-            )}
+            )} */}
 
             {!isReadonly && (
               <MessageActions

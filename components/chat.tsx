@@ -1,12 +1,12 @@
 'use client';
 
-import type { Attachment, Message } from 'ai';
+import type { Attachment } from 'ai';
 import { useChat } from '@ai-sdk/react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import useSWR, { useSWRConfig } from 'swr';
 import { ChatHeader } from '@/components/chat-header';
-import type { Vote } from '@/lib/db/schema';
-import { fetcher, generateUUID } from '@/lib/utils';
+import { message, type Vote } from '@/lib/db/schema';
+import { fetcher, generateUUID, Message } from '@/lib/utils';
 import { Artifact } from './artifact';
 import { MultimodalInput } from './multimodal-input';
 import { Messages } from './messages';
@@ -39,14 +39,31 @@ export function Chat({
     status,
     stop,
     reload,
-  } = useChat({
+  }: any = useChat({
     id,
-    body: { id, selectedChatModel: selectedChatModel },
+    body: { id, selectedChatModelID: selectedChatModel },
     initialMessages,
     experimental_throttle: 100,
     sendExtraMessageFields: true,
     generateId: generateUUID,
-    onFinish: () => {
+    onResponse: (response) => {
+      console.log('response: ', response)
+    },
+    onFinish: ({ id, annotations }, { usage }) => {
+      // Update the specific message with usage data
+      setMessages((prevMessages: any[]) =>
+        prevMessages.map((msg) =>
+          msg.id === id
+            ? {
+              ...msg,
+              promptTokens: usage?.promptTokens || null,
+              completionTokens: usage?.completionTokens || null,
+              totalTokens: usage?.totalTokens || null,
+              // duration: annotations[0].duration || null
+            }
+            : msg
+        )
+      );
       mutate('/api/history');
     },
     onError: () => {
@@ -54,10 +71,10 @@ export function Chat({
     },
   });
 
-  const { data: votes } = useSWR<Array<Vote>>(
-    `/api/vote?chatId=${id}`,
-    fetcher,
-  );
+  // const { data: votes } = useSWR<Array<Vote>>(
+  //   `/api/vote?chatId=${id}`,
+  //   fetcher,
+  // );
 
   const [attachments, setAttachments] = useState<Array<Attachment>>([]);
   const isArtifactVisible = useArtifactSelector((state) => state.isVisible);
@@ -75,8 +92,8 @@ export function Chat({
         <Messages
           chatId={id}
           status={status}
-          votes={votes}
-          messages={messages}
+          // votes={votes}
+          messages={messages as any}
           setMessages={setMessages}
           reload={reload}
           isReadonly={isReadonly}
@@ -115,7 +132,7 @@ export function Chat({
         messages={messages}
         setMessages={setMessages}
         reload={reload}
-        votes={votes}
+        // votes={votes}
         isReadonly={isReadonly}
       />
     </>

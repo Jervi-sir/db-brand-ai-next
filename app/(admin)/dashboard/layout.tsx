@@ -1,11 +1,11 @@
 import { cookies } from 'next/headers';
 
-import { AppSidebar } from '@/components/app-sidebar';
-import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
+import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 
-import { auth } from '../(auth)/auth';
+import { auth } from '../../(auth)/auth';
 import Script from 'next/script';
 import { AppSidebarAdmin } from '@/components/app-siderbar-admin';
+import { Separator } from '@/components/ui/separator';
 
 export const experimental_ppr = true;
 
@@ -25,7 +25,12 @@ export default async function Layout({
       />
       <SidebarProvider defaultOpen={!isCollapsed}>
         <AppSidebarAdmin user={session?.user} />
-        <SidebarInset>{children}</SidebarInset>
+        <SidebarInset>
+        
+          <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
+            {children}
+          </div>
+        </SidebarInset>
       </SidebarProvider>
     </>
   );
