@@ -31,6 +31,9 @@ import { SuggestedActions } from './suggested-actions';
 import equal from 'fast-deep-equal';
 import { UseChatHelpers, UseChatOptions } from '@ai-sdk/react';
 
+// Define possible submit behaviors
+type SubmitOnEnter = 'always' | 'withModifier' | 'never';
+
 function PureMultimodalInput({
   chatId,
   input,
@@ -44,6 +47,7 @@ function PureMultimodalInput({
   append,
   handleSubmit,
   className,
+  submitOnEnter = 'withModifier', // Default to requiring Ctrl+Enter or Cmd+Enter
 }: {
   chatId: string;
   input: UseChatHelpers['input'];
@@ -57,6 +61,7 @@ function PureMultimodalInput({
   append?: UseChatHelpers['append'];
   handleSubmit: UseChatHelpers['handleSubmit'];
   className?: string;
+  submitOnEnter?: SubmitOnEnter; // New prop to control Enter behavior
 }) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { width } = useWindowSize();
@@ -188,11 +193,16 @@ function PureMultimodalInput({
 
   return (
     <div className="relative w-full flex flex-col gap-4">
-      {messages.length === 0 &&
+      {/* {messages.length === 0 &&
         (attachments && attachments.length === 0) &&
         uploadQueue.length === 0 && (
           append && <SuggestedActions append={append} chatId={chatId} />
-        )}
+        )
+      } */}
+
+      {messages.length === 0 &&
+        append && <SuggestedActions append={append} chatId={chatId} />
+      }
 
       <input
         type="file"
@@ -225,54 +235,77 @@ function PureMultimodalInput({
           ))}
         </div>
       )}
+      <div className='relative'>
+        <Textarea
+          data-testid="multimodal-input"
+          ref={textareaRef}
+          placeholder="Send a message..."
+          value={input}
+          onChange={handleInput}
+          className={cx(
+            // 'min-h-[24px] max-h-[calc(75dvh)] overflow-hidden resize-none rounded-2xl !text-base bg-muted pb-10 dark:border-zinc-700',
+            'max-h-[calc(75dvh)] overflow-hidden resize-none rounded-2xl !text-base dark:bg-zinc-950 pb-2 pt-4 dark:border-zinc-700',
+            className,
+          )}
+          rows={2}
+          autoFocus
+          // onKeyDown={(event) => {
+          //   if (
+          //     event.key === 'Enter' &&
+          //     !event.shiftKey &&
+          //     !event.nativeEvent.isComposing
+          //   ) {
+          //     event.preventDefault();
 
-      <Textarea
-        data-testid="multimodal-input"
-        ref={textareaRef}
-        placeholder="Send a message..."
-        value={input}
-        onChange={handleInput}
-        className={cx(
-          'min-h-[24px] max-h-[calc(75dvh)] overflow-hidden resize-none rounded-2xl !text-base bg-muted pb-10 dark:border-zinc-700',
-          className,
-        )}
-        rows={2}
-        autoFocus
-        onKeyDown={(event) => {
-          if (
-            event.key === 'Enter' &&
-            !event.shiftKey &&
-            !event.nativeEvent.isComposing
-          ) {
-            event.preventDefault();
+          //     if (status !== 'ready') {
+          //       toast.error('Please wait for the model to finish its response!');
+          //     } else {
+          //       submitForm();
+          //     }
+          //   }
+          // }}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter' && !event.nativeEvent.isComposing) {
+              if (status !== 'ready') {
+                event.preventDefault();
+                toast.error('Please wait for the model to finish its response!');
+                return;
+              }
 
-            if (status !== 'ready') {
-              toast.error('Please wait for the model to finish its response!');
-            } else {
-              submitForm();
+              if (submitOnEnter === 'always' && !event.shiftKey) {
+                event.preventDefault();
+                submitForm();
+              } else if (submitOnEnter === 'withModifier' && (event.ctrlKey || event.metaKey)) {
+                event.preventDefault();
+                submitForm();
+              } else if (submitOnEnter === 'never' || event.shiftKey) {
+                // Allow newline by not preventing default
+                // Textarea will handle adding the newline naturally
+              }
             }
-          }
-        }}
-      />
+          }}
+        />
 
-      {setAttachments
-        &&
-        <div className="absolute bottom-0 p-2 w-fit flex flex-row justify-start">
-          <AttachmentsButton fileInputRef={fileInputRef} status={status} />
+        {setAttachments
+          &&
+          <div className="absolute bottom-0 p-2 w-fit flex flex-row justify-start">
+            <AttachmentsButton fileInputRef={fileInputRef} status={status} />
+          </div>
+        }
+
+        <div className="absolute top-0 right-0 p-2 pt-4 w-fit flex flex-row justify-end">
+          {status === 'submitted' ? (
+            <StopButton stop={stop} setMessages={setMessages} />
+          ) : (
+            <SendButton
+              input={input}
+              submitForm={submitForm}
+              uploadQueue={uploadQueue}
+            />
+          )}
         </div>
-      }
-
-      <div className="absolute bottom-0 right-0 p-2 w-fit flex flex-row justify-end">
-        {status === 'submitted' ? (
-          <StopButton stop={stop} setMessages={setMessages} />
-        ) : (
-          <SendButton
-            input={input}
-            submitForm={submitForm}
-            uploadQueue={uploadQueue}
-          />
-        )}
       </div>
+
     </div>
   );
 }
@@ -283,6 +316,7 @@ export const MultimodalInput = memo(
     if (prevProps.input !== nextProps.input) return false;
     if (prevProps.status !== nextProps.status) return false;
     if (!equal(prevProps.attachments, nextProps.attachments)) return false;
+    if (prevProps.submitOnEnter !== nextProps.submitOnEnter) return false; // Check new prop
 
     return true;
   },
@@ -349,14 +383,14 @@ function PureSendButton({
   return (
     <Button
       data-testid="send-button"
-      className="rounded-full p-1.5 h-fit border dark:border-zinc-600"
+      className="rounded-lg p-1.5 h-8 w-8 border dark:border-zinc-900"
       onClick={(event) => {
         event.preventDefault();
         submitForm();
       }}
       disabled={input.length === 0 || uploadQueue.length > 0}
     >
-      <ArrowUpIcon size={14} />
+      <ArrowUpIcon size={16} />
     </Button>
   );
 }

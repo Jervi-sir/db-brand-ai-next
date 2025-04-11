@@ -107,8 +107,8 @@ export function Chat({
               handleSubmit={handleSubmit}
               status={status}
               stop={stop}
-              attachments={attachments}
-              setAttachments={setAttachments}
+              // attachments={attachments}
+              // setAttachments={setAttachments}
               messages={messages}
               setMessages={setMessages}
               append={append}

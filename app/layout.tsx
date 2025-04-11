@@ -2,13 +2,25 @@ import type { Metadata } from 'next';
 import { Toaster } from 'sonner';
 
 import { ThemeProvider } from '@/components/theme-provider';
+import { Cairo, Inter, Tajawal, Taviraj } from 'next/font/google'
+
+// If loading a variable font, you don't need to specify the font weight
+const inter = Inter({
+  subsets: ['latin'],
+  display: 'swap',
+})
+const tajawal = Tajawal({
+  subsets: ['arabic'],
+  display: 'auto',
+  weight: ['200', '300', '400', '500', '700', '800', '900']
+})
 
 import './globals.css';
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://chat.vercel.ai'),
-  title: 'Next.js Chatbot Template',
-  description: 'Next.js chatbot template using the AI SDK.',
+  metadataBase: new URL('https://ai.ammiteboune.com'),
+  title: 'Dr Brand ai',
+  description: 'Dr Brand ai Here.',
 };
 
 export const viewport = {
@@ -47,6 +59,7 @@ export default async function RootLayout({
       // visual flicker before hydration. Hence the `suppressHydrationWarning`
       // prop is necessary to avoid the React hydration mismatch warning.
       // https://github.com/pacocoursey/next-themes?tab=readme-ov-file#with-app
+      className={tajawal.className}
       suppressHydrationWarning
     >
       <head>

@@ -18,6 +18,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 import { MessageEditor } from './message-editor';
 import { DocumentPreview } from './document-preview';
 import { MessageReasoning } from './message-reasoning';
+import { containsArabic } from '@/hooks/detect-arabic';
 
 const PurePreviewMessage = ({
   chatId,
@@ -41,6 +42,7 @@ const PurePreviewMessage = ({
   isReadonly: boolean;
 }) => {
   const [mode, setMode] = useState<'view' | 'edit'>('view');
+  const isArabic = containsArabic(message.content);
 
   return (
     <AnimatePresence>
@@ -114,10 +116,11 @@ const PurePreviewMessage = ({
                 )} */}
 
                 <div
-                  className={cn('flex flex-col gap-4', {
+                  className={cn('flex flex-col gap-4 max-w-xl', {
                     'bg-primary text-primary-foreground px-3 py-2 rounded-xl':
                       message.role === 'user',
                   })}
+                  dir={isArabic ? 'rtl' : 'ltr'}
                 >
                   <Markdown>{message.content as string}</Markdown>
                 </div>

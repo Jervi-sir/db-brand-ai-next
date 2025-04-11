@@ -50,6 +50,7 @@ function PureSuggestedActions({ chatId, append }: SuggestedActionsProps) {
           transition={{ delay: 0.05 * index }}
           key={`suggested-action-${suggestedAction.title}-${index}`}
           className={index > 1 ? 'hidden sm:block' : 'block'}
+          dir='rtl'
         >
           <Button
             variant="ghost"
