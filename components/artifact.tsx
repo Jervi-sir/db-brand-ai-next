@@ -315,7 +315,7 @@ function PureArtifact({
                   status={status}
                   votes={votes}
                   messages={messages}
-                  setMessages={setMessages}
+                  setMessages={setMessages as any}
                   reload={reload}
                   isReadonly={isReadonly}
                   artifactStatus={artifact.status}

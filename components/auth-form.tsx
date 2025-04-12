@@ -25,7 +25,7 @@ export function AuthForm({
         action={action}
         className="bg-card m-auto h-fit w-full max-w-sm rounded-[calc(var(--radius)+.125rem)] border p-0.5 shadow-md dark:[--color-muted:var(--color-zinc-900)]"
       >
-        <div className="p-6 pb-6">
+        <div className="p-6">
           <div>
             <h1 className="mb-1 text-xl font-semibold">{source === 'login' ? 'Log in' : 'Register'} to Dr Brand</h1>
             {source === 'login'
@@ -98,7 +98,7 @@ export function AuthForm({
           {source === 'login'
             ?
             <p className="text-accent-foreground text-center text-sm">
-              Don't have an account ?
+              Don&apos;t have an account ?
               <Button asChild variant="link" className="px-2">
                 <Link href="/register">Create account</Link>
               </Button>

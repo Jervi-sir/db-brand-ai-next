@@ -31,14 +31,14 @@ export function PureMessageActions({
 }) {
   // const { mutate } = useSWRConfig();
   const [_, copyToClipboard] = useCopyToClipboard();
+  const { data: session, status } = useSession();
+  const isAdmin = (session?.user as any)?.role === 'admin';
 
   if (isLoading) return null;
   if (message.role === 'user') return null;
   if (message.toolInvocations && message.toolInvocations.length > 0)
     return null;
 
-  const { data: session, status } = useSession();
-  const isAdmin = (session?.user as any)?.role === 'admin';
 
   return (
     <TooltipProvider delayDuration={0}>

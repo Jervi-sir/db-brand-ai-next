@@ -383,7 +383,7 @@ function PureSendButton({
   return (
     <Button
       data-testid="send-button"
-      className="rounded-lg p-1.5 h-8 w-8 border dark:border-zinc-900"
+      className="rounded-lg p-1.5 size-8 border dark:border-zinc-900"
       onClick={(event) => {
         event.preventDefault();
         submitForm();

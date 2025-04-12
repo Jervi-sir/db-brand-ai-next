@@ -19,7 +19,7 @@ export function ModelSelector({
   selectedModelId: string;
 } & React.ComponentProps<typeof Button>) {
   const [open, setOpen] = useState(false);
-  const [optimisticModelId, setOptimisticModelId] = useOptimistic(selectedModelId);
+  const [optimisticModelId, setOptimisticModelId] = useOptimistic(selectedModelId || '');
   const [models, setModels] = useState<{ id: string; name: string; description: string }[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -48,7 +48,7 @@ export function ModelSelector({
       }
     };
     fetchModels();
-  }, [selectedModelId]); // Depend on selectedModelId to avoid unnecessary re-runs
+  }, [selectedModelId]);
 
   const selectedChatModel: any = useMemo(
     () => models.find((chatModel) => chatModel.id === optimisticModelId),

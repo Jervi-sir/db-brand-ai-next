@@ -95,7 +95,7 @@ const Tool = ({
       setSelectedTool(description);
     } else {
       setSelectedTool(null);
-      if(append) onClick({ appendMessage: append });
+      if(append) onClick({ appendMessage: append } as any);
     }
   };
 

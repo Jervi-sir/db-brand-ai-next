@@ -1,12 +1,14 @@
 "use client"
 
 import * as React from "react"
-import { BookOpen, Bot, Command, Frame, LifeBuoy, LogOut, Map, PieChart, Send, Settings2, SquareTerminal, TowerControlIcon, X, } from "lucide-react"
+import { Bot, Command, Settings2, SquareTerminal, TowerControlIcon, X, } from "lucide-react"
 
-import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, useSidebar, } from "@/components/ui/sidebar"
+import { 
+  Sidebar, SidebarContent, SidebarFooter, SidebarHeader, useSidebar, 
+  SidebarGroup, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem
+} from "@/components/ui/sidebar"
 import { ChevronRight, type LucideIcon } from "lucide-react"
 
-import { SidebarGroup, SidebarGroupLabel, SidebarMenu, SidebarMenuAction, SidebarMenuButton, SidebarMenuItem, SidebarMenuSub, SidebarMenuSubButton, SidebarMenuSubItem, } from "@/components/ui/sidebar"
 import { User } from "next-auth"
 import { usePathname, useRouter } from "next/navigation"
 import { SidebarUserNav } from '@/components/sidebar-user-nav';
