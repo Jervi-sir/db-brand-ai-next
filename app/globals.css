@@ -58,6 +58,7 @@
         --sidebar-border: 220 13% 91%;
         --sidebar-ring: 217.2 91.2% 59.8%;
     }
+
     .dark {
         --background: 240 10% 3.9%;
         --foreground: 0 0% 98%;
@@ -103,6 +104,20 @@
         @apply bg-background text-foreground;
     }
 
+    html {
+        font-family: tajawal, sans-serif;
+    }
+
+    .latin-text {
+        font-family: inter, sans-serif;
+        line-height: 1.5;
+    }
+
+    .arabic-text {
+        font-family: tajawal, sans-serif;
+        line-height: 1.4;
+    }
+
     @font-face {
         font-family: "geist";
         font-style: normal;
@@ -146,7 +161,7 @@
     @apply bg-background dark:bg-zinc-800 outline-none selection:bg-zinc-900 !important;
 }
 
-.ͼo.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground,
+.ͼo.cm-focused>.cm-scroller>.cm-selectionLayer .cm-selectionBackground,
 .ͼo.cm-selectionBackground,
 .ͼo.cm-content::selection {
     @apply bg-zinc-200 dark:bg-zinc-900 !important;
@@ -180,13 +195,12 @@
 
 ::-webkit-scrollbar {
     @apply w-2.5 h-2.5;
-  }
+}
 
-  ::-webkit-scrollbar-track {
-      @apply bg-transparent
-  }
-  
-  ::-webkit-scrollbar-thumb {
-      @apply rounded-full bg-border border-[1px] border-transparent border-solid bg-clip-padding;
-  }
+::-webkit-scrollbar-track {
+    @apply bg-transparent
+}
 
+::-webkit-scrollbar-thumb {
+    @apply rounded-full bg-border border-[1px] border-transparent border-solid bg-clip-padding;
+}

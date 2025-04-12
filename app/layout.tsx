@@ -2,17 +2,17 @@ import type { Metadata } from 'next';
 import { Toaster } from 'sonner';
 
 import { ThemeProvider } from '@/components/theme-provider';
-import { Cairo, Inter, Tajawal, Taviraj } from 'next/font/google'
+import { Beiruti,Inter } from 'next/font/google'
 
 // If loading a variable font, you don't need to specify the font weight
 const inter = Inter({
   subsets: ['latin'],
   display: 'swap',
 })
-const tajawal = Tajawal({
-  subsets: ['arabic'],
-  display: 'auto',
-  weight: ['200', '300', '400', '500', '700', '800', '900']
+
+const beiruti = Beiruti({
+  weight: ['200', '300', '400', '500', '600', '700', '800', '900' ],
+  subsets: ['arabic', 'latin'],
 })
 
 import './globals.css';
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport = {
-  maximumScale: 1, // Disable auto-zoom on mobile Safari
+  maximumScale: 1, 
 };
 
 const LIGHT_THEME_COLOR = 'hsl(0 0% 100%)';
@@ -55,11 +55,7 @@ export default async function RootLayout({
   return (
     <html
       lang="en"
-      // `next-themes` injects an extra classname to the body element to avoid
-      // visual flicker before hydration. Hence the `suppressHydrationWarning`
-      // prop is necessary to avoid the React hydration mismatch warning.
-      // https://github.com/pacocoursey/next-themes?tab=readme-ov-file#with-app
-      className={tajawal.className}
+      className={beiruti.className}
       suppressHydrationWarning
     >
       <head>

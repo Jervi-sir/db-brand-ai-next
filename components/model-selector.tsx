@@ -1,4 +1,3 @@
-// components/ModelSelector.tsx
 'use client';
 
 import { startTransition, useMemo, useOptimistic, useState, useEffect } from 'react';
@@ -24,7 +23,7 @@ export function ModelSelector({
   const [models, setModels] = useState<{ id: string; name: string; description: string }[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Fetch models from API
+  // Fetch models from API and select first model if none is selected
   useEffect(() => {
     const fetchModels = async () => {
       setLoading(true);
@@ -33,6 +32,15 @@ export function ModelSelector({
         if (!response.ok) throw new Error('Failed to fetch models');
         const data = await response.json();
         setModels(data);
+
+        // If no model is selected and models are available, select the first one
+        if (!selectedModelId && data.length > 0) {
+          const firstModelId = data[0].id;
+          startTransition(() => {
+            setOptimisticModelId(firstModelId);
+            saveChatModelAsCookie(firstModelId);
+          });
+        }
       } catch (error) {
         console.error('Error fetching models:', error);
       } finally {
@@ -40,7 +48,7 @@ export function ModelSelector({
       }
     };
     fetchModels();
-  }, []);
+  }, [selectedModelId]); // Depend on selectedModelId to avoid unnecessary re-runs
 
   const selectedChatModel: any = useMemo(
     () => models.find((chatModel) => chatModel.id === optimisticModelId),

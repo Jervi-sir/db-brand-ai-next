@@ -1,9 +1,8 @@
 import { compare } from 'bcrypt-ts';
 import NextAuth, { type User as NextAuthUser, type Session } from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
-
-import { getUser } from '@/lib/db/queries';
-
+import Google from 'next-auth/providers/google';
+import { getUser, createUser } from '@/lib/db/queries';
 import { authConfig } from './auth.config';
 
 export interface ExtendedUser extends NextAuthUser {
@@ -14,54 +13,79 @@ interface ExtendedSession extends Session {
   user: ExtendedUser;
 }
 
-export const {
-  handlers: { GET, POST },
-  auth,
-  signIn,
-  signOut,
-} = NextAuth({
+export const { handlers: { GET, POST }, auth, signIn, signOut } = NextAuth({
   ...authConfig,
   providers: [
+    Google,
     Credentials({
       credentials: {},
       async authorize({ email, password }: any) {
-        const users = await getUser(email);
-        if (users.length === 0) return null;
-        // biome-ignore lint: Forbidden non-null assertion.
-        const user = users[0];
-        const passwordsMatch = await compare(password, user.password || '');
-        if (!passwordsMatch) return null;
-        // return users[0] as any;
-        return {
-          id: user.id.toString(), // Convert to string for NextAuth
-          email: user.email,
-          role: user.role || 'user', // Default to 'user' if no role
-        } as ExtendedUser;
-
+        try {
+          const users = await getUser(email);
+          if (users.length === 0) return null;
+          const user = users[0];
+          const passwordsMatch = await compare(password, user.password || '');
+          if (!passwordsMatch) return null;
+          return {
+            id: user.id.toString(),
+            email: user.email,
+            role: user.role || 'user',
+          } as ExtendedUser;
+        } catch (error) {
+          console.error('Credentials authorize error:', error);
+          return null;
+        }
       },
     }),
   ],
   callbacks: {
-    async jwt({ token, user }) {
-      if (user) {
-        token.id = user.id;
-        token.role = (user as ExtendedUser).role || 'user'; // Pass role to token
+    async signIn({ user, account, profile }) {
+      try {
+        if (account?.provider === 'google' && user.email) {
+          const existingUsers = await getUser(user.email);
+          if (existingUsers.length === 0) {
+            await createUser(user.email, null);
+          }
+          return true;
+        }
+        return true;
+      } catch (error) {
+        console.error('signIn callback error:', error);
+        return `/login?error=CallbackError`;
       }
-      return token;
+    },
+    async jwt({ token, user }) {
+      try {
+        if (user) {
+          token.id = user.id;
+          token.role = (user as ExtendedUser).role || 'user';
+        }
+        return token;
+      } catch (error) {
+        console.error('JWT callback error:', error);
+        return token;
+      }
     },
     async session({ session, token }: { session: ExtendedSession; token: any }) {
-      if (session.user) {
-        session.user.id = token.id as string;
-        session.user.role = token.role as string; // Pass role to session
-
-        // Optionally, fetch fresh data from the database
-        const dbUsers = await getUser(session.user.email || '');
-        if (dbUsers.length > 0) {
-          const dbUser = dbUsers[0];
-          session.user.role = dbUser.role || token.role || 'user';
+      try {
+        if (session.user) {
+          session.user.id = token.id as string;
+          session.user.role = token.role as string;
+          const dbUsers = await getUser(session.user.email || '');
+          if (dbUsers.length > 0) {
+            const dbUser = dbUsers[0];
+            session.user.id = dbUser.id as string;
+            session.user.role = dbUser.role || token.role || 'user';
+          }
         }
+        return session;
+      } catch (error) {
+        console.error('Session callback error:', error);
+        return session;
       }
-      return session;
     },
+  },
+  pages: {
+    error: '/login',
   },
 });

@@ -14,26 +14,25 @@ export const Overview = () => {
       exit={{ opacity: 0, scale: 0.98 }}
       transition={{ delay: 0.5 }}
     >
-      <div className="rounded-xl p-6 flex flex-col gap-8 leading-relaxed text-center max-w-xl">
-        <p className="flex flex-row justify-center gap-4 items-center">
+      <div className="rounded-xl p-6 flex flex-col gap-0 leading-relaxed text-center max-w-xl">
+        <p className="flex flex-row justify-center gap-4 items-center pb-8">
           <VercelIcon size={32} />
           <span>+</span>
           <InstagramIcon size={32} />
         </p>
-        <p dir='rtl'>
+        <p dir='rtl' className='pb-2'>
           مرحبا! أنا د. براند، خبير في صناعة محتوى إنستغرام يجذب الجزايريين 🇩🇿. نساعدك تبني محتوى فيه الهوك والتشويق يخلي الناس تقول &quot;هذا أنا!&quot; وتشير لصحابها.
         </p>
-        <p dir='rtl'>
+        <p dir='rtl' className='pb-3'>
           سواء كنت صاحب بيزنس، فودي، ولا تحب السفر، عندنا أفكار تجيب ملاين المشاهدات! ابدأ دز بروفايلك وخلينا نطلعو ليك فولوورز.
-          <br />
-          <p
-            className="font-medium underline underline-offset-8"
-            dir='rtl'
-          >
-            جرب الآن
-          </p>
         </p>
-      </div>
-    </motion.div>
+        <p
+          className="font-medium underline underline-offset-8"
+          dir='rtl'
+        >
+          جرب الآن
+        </p>
+    </div>
+    </motion.div >
   );
 };

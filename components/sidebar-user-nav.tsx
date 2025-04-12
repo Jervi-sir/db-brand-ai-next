@@ -66,7 +66,7 @@ export function SidebarUserNav({ user }: { user: ExtendedUser }) {
                 className="w-full cursor-pointer"
                 onClick={() => {
                   signOut({
-                    redirectTo: '/',
+                    redirectTo: process.env.AUTH_TRUST_HOST ,
                   });
                 }}
               >
