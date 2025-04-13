@@ -49,6 +49,7 @@ import {
 import type { Chat } from '@/lib/db/schema';
 import { fetcher } from '@/lib/utils';
 import { useChatVisibility } from '@/hooks/use-chat-visibility';
+import { useLockStore } from '@/zustand/use-lock-store';
 
 type GroupedChats = {
   today: Chat[];
@@ -73,6 +74,7 @@ const PureChatItem = ({
     chatId: chat.id,
     initialVisibility: chat.visibility,
   });
+  const isUnlocked = useLockStore((state: any) => state.isUnlocked);
 
   return (
     <SidebarMenuItem>
@@ -134,6 +136,7 @@ const PureChatItem = ({
           <DropdownMenuItem
             className="cursor-pointer text-destructive focus:bg-destructive/15 focus:text-destructive dark:text-red-500"
             onSelect={() => onDelete(chat.id)}
+            disabled={!isUnlocked}
           >
             <TrashIcon />
             <span>Delete</span>

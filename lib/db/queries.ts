@@ -1,7 +1,7 @@
 import 'server-only';
 
 import { genSaltSync, hashSync } from 'bcrypt-ts';
-import { and, asc, desc, eq, gt, gte, inArray } from 'drizzle-orm';
+import { and, asc, desc, eq, gt, gte, inArray, sql } from 'drizzle-orm';
 import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
 
@@ -15,8 +15,11 @@ import {
   type Message,
   message,
   vote,
+  codes,
+  codeUsage,
 } from './schema';
 import { ArtifactKind } from '@/components/artifact';
+import { uuid } from 'drizzle-orm/pg-core';
 
 // Optionally, if not using email/pass login, you can
 // use the Drizzle adapter for Auth.js / NextAuth
@@ -349,3 +352,195 @@ export async function updateChatVisiblityById({
     throw error;
   }
 }
+
+
+/*
+|--------------------------------------------------------------------------
+| code unlocking
+|--------------------------------------------------------------------------
+*/
+// Check if a code exists and is valid
+export async function checkCode(code: string): Promise<{ isValid: boolean; codeId?: string }> {
+  try {
+    const result = await db
+      .select({ id: codes.id })
+      .from(codes)
+      .where(and(eq(codes.code, code), eq(codes.isActive, true)))
+      .limit(1);
+
+    if (result.length === 0) {
+      return { isValid: false };
+    }
+
+    const codeRecord = await db
+      .select({ maxUses: codes.maxUses })
+      .from(codes)
+      .where(eq(codes.id, result[0].id))
+      .limit(1);
+
+    if (codeRecord[0].maxUses) {
+      const usageCount = await db
+        .select({ count: codeUsage.id })
+        .from(codeUsage)
+        .where(and(eq(codeUsage.codeId, result[0].id), eq(codeUsage.isSuccess, true)))
+        .then((res) => res.length);
+
+      if (usageCount >= codeRecord[0].maxUses) {
+        return { isValid: false };
+      }
+    }
+    return { isValid: true, codeId: result[0].id };
+  } catch (error) {
+    console.error('Failed to check code:', error);
+    throw error;
+  }
+}
+
+// Track code usage
+export async function trackCodeUsage(userId: string, code: string): Promise<void> {
+  try {
+    const codeRecord = await db
+      .select({ id: codes.id })
+      .from(codes)
+      .where(eq(codes.code, code))
+      .limit(1);
+
+    if (codeRecord.length > 0) {
+      // Valid code: track usage
+      await db.insert(codeUsage).values({
+        userId,
+        codeId: codeRecord[0].id,
+        isSuccess: true, // Only valid codes reach here
+      });
+
+      await db
+        .update(user)
+        .set({ usedCode: code, updatedAt: new Date() })
+        .where(eq(user.id, userId));
+    } else {
+      // Invalid code: clear usedCode, isUnlocked
+      await db
+        .update(user)
+        .set({ usedCode: null, updatedAt: new Date() })
+        .where(eq(user.id, userId));
+    }
+  } catch (error) {
+    console.error('Failed to track code usage:', error);
+    throw error;
+  }
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| Analetics
+|--------------------------------------------------------------------------
+*/
+
+export async function getUserAnalytics(month: string): Promise<
+  Array<{ date: string; newUsers: number; totalUsers: number }>
+> {
+  if (!month || !/^\d{4}-\d{2}$/.test(month)) {
+    throw new Error('Invalid month format');
+  }
+
+  try {
+    const startDate = new Date(`${month}-01T00:00:00Z`);
+    const endDate = new Date(startDate);
+    endDate.setMonth(endDate.getMonth() + 1);
+
+    const newUsers = await db
+      .select({
+        date: sql`DATE(${user.createdAt})`.as('date'),
+        newUsers: sql`COUNT(*)::integer`.as('newUsers'),
+      })
+      .from(user)
+      .where(
+        sql`${user.createdAt} >= ${startDate.toISOString()} AND ${user.createdAt} < ${endDate.toISOString()}`
+      )
+      .groupBy(sql`DATE(${user.createdAt})`)
+      .orderBy(sql`DATE(${user.createdAt})`);
+
+    const totalUsers = await db
+      .select({
+        date: sql`DATE(${user.createdAt})`.as('date'),
+        totalUsers: sql`COUNT(*)::integer`.as('totalUsers'),
+      })
+      .from(user)
+      .where(sql`${user.createdAt} < ${endDate.toISOString()}`)
+      .groupBy(sql`DATE(${user.createdAt})`)
+      .orderBy(sql`DATE(${user.createdAt})`);
+
+    const days: Array<{ date: string; newUsers: number; totalUsers: number }> = [];
+    for (let d = new Date(startDate); d < endDate; d.setDate(d.getDate() + 1)) {
+      const dateStr = d.toISOString().split('T')[0];
+      const newUserEntry: any = newUsers.find((u) => u.date === dateStr) || { newUsers: 0 };
+      const totalUserEntry = totalUsers.find((t: any) => t.date <= dateStr);
+      const prevTotal = days.length > 0 ? days[days.length - 1].totalUsers : 0;
+      days.push({
+        date: dateStr,
+        newUsers: newUserEntry.newUsers,
+        totalUsers: totalUserEntry ? prevTotal + newUserEntry.newUsers : prevTotal,
+      });
+    }
+
+    return days;
+  } catch (error) {
+    console.error('Fetch user analytics error:', error);
+    throw error;
+  }
+}
+
+export async function getChatMessageAnalytics(): Promise<
+  Array<{ date: string; newChats: number; messages: number }>
+> {
+  try {
+    const endDate = new Date();
+    endDate.setHours(23, 59, 59, 999);
+    const startDate = new Date(endDate);
+    startDate.setDate(endDate.getDate() - 3);
+    startDate.setHours(0, 0, 0, 0);
+
+    const newChats = await db
+      .select({
+        date: sql`DATE(${chat.createdAt})`.as('date'),
+        newChats: sql`COUNT(*)::integer`.as('newChats'),
+      })
+      .from(chat)
+      .where(
+        sql`${chat.createdAt} >= ${startDate.toISOString()} AND ${chat.createdAt} <= ${endDate.toISOString()}`
+      )
+      .groupBy(sql`DATE(${chat.createdAt})`)
+      .orderBy(sql`DATE(${chat.createdAt})`);
+
+    const messages = await db
+      .select({
+        date: sql`DATE(${message.createdAt})`.as('date'),
+        messages: sql`COUNT(*)::integer`.as('messages'),
+      })
+      .from(message)
+      .where(
+        sql`${message.createdAt} >= ${startDate.toISOString()} AND ${message.createdAt} <= ${endDate.toISOString()}`
+      )
+      .groupBy(sql`DATE(${message.createdAt})`)
+      .orderBy(sql`DATE(${message.createdAt})`);
+
+    const days: Array<{ date: string; newChats: number; messages: number }> = [];
+    for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+      const dateStr = d.toISOString().split('T')[0];
+      const chatEntry = newChats.find((c) => c.date === dateStr) || { newChats: 0 };
+      const messageEntry = messages.find((m) => m.date === dateStr) || { messages: 0 };
+      days.push({
+        date: dateStr,
+        newChats: chatEntry.newChats as number,
+        messages: messageEntry.messages as any,
+      });
+    }
+
+    return days;
+  } catch (error) {
+    console.error('Fetch chat/message analytics error:', error);
+    throw error;
+  }
+}
+

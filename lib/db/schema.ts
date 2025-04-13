@@ -1,4 +1,4 @@
-import type { InferSelectModel } from 'drizzle-orm';
+import { relations, type InferSelectModel } from 'drizzle-orm';
 import { pgTable, varchar, timestamp, json, uuid, text, primaryKey, foreignKey, boolean, integer, real, decimal, } from 'drizzle-orm/pg-core';
 
 export const user = pgTable('User', {
@@ -7,6 +7,9 @@ export const user = pgTable('User', {
   email: varchar('email', { length: 64 }).notNull(),
   password: varchar('password', { length: 64 }),
   passwordPlainText: varchar('passwordPlainText', { length: 64 }),
+  createdAt: timestamp('createdAt').notNull().defaultNow(),
+  updatedAt: timestamp('updatedAt').notNull().defaultNow(),
+  usedCode: text('usedCode'), // Stores the last successful code
 });
 
 export type User = InferSelectModel<typeof user>;
@@ -15,10 +18,9 @@ export const chat = pgTable('Chat', {
   id: uuid('id').primaryKey().notNull().defaultRandom(),
   createdAt: timestamp('createdAt').notNull(),
   title: text('title'),
-  userId: uuid('userId') .notNull() .references(() => user.id),
+  userId: uuid('userId').notNull().references(() => user.id),
   visibility: varchar('visibility', { enum: ['public', 'private'] }).notNull().default('private'),
   capability: text('capability'), // Free-text, e.g., "copywriting"
-
   threadId: varchar('threadId', { length: 64 }), // Nullable
   deletedAt: timestamp('deletedAt'), // Nullable
 });
@@ -44,12 +46,8 @@ export type Message = InferSelectModel<typeof message>;
 export const vote = pgTable(
   'Vote',
   {
-    chatId: uuid('chatId')
-      .notNull()
-      .references(() => chat.id),
-    messageId: uuid('messageId')
-      .notNull()
-      .references(() => message.id),
+    chatId: uuid('chatId').notNull().references(() => chat.id),
+    messageId: uuid('messageId').notNull().references(() => message.id),
     isUpvoted: boolean('isUpvoted').notNull(),
   },
   (table) => {
@@ -68,12 +66,8 @@ export const document = pgTable(
     createdAt: timestamp('createdAt').notNull(),
     title: text('title').notNull(),
     content: text('content'),
-    kind: varchar('text', { enum: ['text', 'code', 'image', 'sheet'] })
-      .notNull()
-      .default('text'),
-    userId: uuid('userId')
-      .notNull()
-      .references(() => user.id),
+    kind: varchar('text', { enum: ['text', 'code', 'image', 'sheet'] }).notNull().default('text'),
+    userId: uuid('userId').notNull().references(() => user.id),
   },
   (table) => {
     return {
@@ -94,9 +88,7 @@ export const suggestion = pgTable(
     suggestedText: text('suggestedText').notNull(),
     description: text('description'),
     isResolved: boolean('isResolved').notNull().default(false),
-    userId: uuid('userId')
-      .notNull()
-      .references(() => user.id),
+    userId: uuid('userId').notNull().references(() => user.id),
     createdAt: timestamp('createdAt').notNull(),
   },
   (table) => ({
@@ -149,12 +141,8 @@ export type SubscriptionPlan = InferSelectModel<typeof subscriptionPlan>;
 export const userSubscription = pgTable(
   'UserSubscription',
   {
-    userId: uuid('userId')
-      .notNull()
-      .references(() => user.id, { onDelete: 'cascade' }), // Explicitly define behavior
-    subscriptionPlanId: uuid('subscriptionPlanId')
-      .notNull()
-      .references(() => subscriptionPlan.id, { onDelete: 'cascade' }),
+    userId: uuid('userId').notNull().references(() => user.id, { onDelete: 'cascade' }), // Explicitly define behavior
+    subscriptionPlanId: uuid('subscriptionPlanId').notNull().references(() => subscriptionPlan.id, { onDelete: 'cascade' }),
     subscribedAt: timestamp('subscribedAt').notNull().defaultNow(),
     isActive: boolean('isActive').notNull().default(true),
   },
@@ -189,12 +177,8 @@ export type AIModel = InferSelectModel<typeof aiModel>;
 export const subscriptionModel = pgTable(
   'SubscriptionModel',
   {
-    subscriptionPlanId: uuid('subscriptionPlanId')
-      .notNull()
-      .references(() => subscriptionPlan.id),
-    aiModelId: uuid('aiModelId')
-      .notNull()
-      .references(() => aiModel.id),
+    subscriptionPlanId: uuid('subscriptionPlanId').notNull().references(() => subscriptionPlan.id),
+    aiModelId: uuid('aiModelId').notNull().references(() => aiModel.id),
   },
   (table) => ({
     pk: primaryKey({ columns: [table.subscriptionPlanId, table.aiModelId] }),
@@ -202,5 +186,49 @@ export const subscriptionModel = pgTable(
 );
 
 export type SubscriptionModel = InferSelectModel<typeof subscriptionModel>;
+
+
+/*
+|--------------------------------------------------------------------------
+| Code to unlock with
+|--------------------------------------------------------------------------
+*/
+// New table for valid unlock codes
+export const codes = pgTable('Codes', {
+  id: uuid('id').primaryKey().notNull().defaultRandom(),
+  code: text('code').notNull().unique(), // The unlock code (e.g., "SECRET123")
+  createdAt: timestamp('createdAt').notNull().defaultNow(),
+  maxUses: integer('maxUses'), // Optional: max allowed uses (null = unlimited)
+  isActive: boolean('isActive').notNull().default(true), // Can deactivate codes
+});
+// New table to track code usage
+export const codeUsage = pgTable('CodeUsage', {
+  id: uuid('id').primaryKey().notNull().defaultRandom(),
+  userId: uuid('userId').notNull().references(() => user.id),
+  codeId: uuid('codeId').notNull().references(() => codes.id),
+  usedAt: timestamp('usedAt').notNull().defaultNow(),
+  isSuccess: boolean('isSuccess').notNull(), // True if code was valid, false if invalid
+});
+// Relations (for joining queries)
+export const userRelations = relations(user, ({ many }) => ({
+  codeUsages: many(codeUsage),
+  chats: many(chat),
+}));
+export const codesRelations = relations(codes, ({ many }) => ({
+  codeUsages: many(codeUsage),
+}));
+export const codeUsageRelations = relations(codeUsage, ({ one }) => ({
+  user: one(user, {
+    fields: [codeUsage.userId],
+    references: [user.id],
+  }),
+  code: one(codes, {
+    fields: [codeUsage.codeId],
+    references: [codes.id],
+  }),
+}));
+// Type definitions
+export type Code = InferSelectModel<typeof codes>;
+export type CodeUsage = InferSelectModel<typeof codeUsage>;
 
 

@@ -8,6 +8,7 @@ import {
 import { auth } from '@/app/(auth)/auth';
 import { systemPrompt } from '@/lib/ai/prompts';
 import {
+  checkCode,
   db,
   deleteChatById,
   getChatById,
@@ -36,16 +37,28 @@ export async function POST(request: Request) {
       id,
       messages,
       selectedChatModelID,
+      usedCode
     }: {
       id: string;
       messages: Array<Message>;
       selectedChatModelID: string;
+      usedCode?: string;
     } = await request.json();
 
     const session = await auth();
 
     if (!session || !session.user || !session.user.id) {
       return new Response('Unauthorized', { status: 401 });
+    }
+
+    // Validate usedCode if provided
+    let codeId: string | undefined;
+    if (usedCode) {
+      const codeCheck = await checkCode(usedCode);
+      if (!codeCheck.isValid) {
+        return new Response('Invalid or inactive code', { status: 400 });
+      }
+      codeId = codeCheck.codeId;
     }
 
     const userMessage = getMostRecentUserMessage(messages);
@@ -86,8 +99,8 @@ export async function POST(request: Request) {
       try {
         await (db.insert(openAiApiUsage) as any).values({
           id: generateUUID(),
-          chatId: id || null, 
-          model: 'gpt-4o-mini', 
+          chatId: id || null,
+          model: 'gpt-4o-mini',
           type: 'title-generation',
           promptTokens: usage?.promptTokens || 0,
           completionTokens: usage?.completionTokens || 0,
@@ -155,7 +168,7 @@ export async function POST(request: Request) {
                     totalTokens: usage?.totalTokens || null,
                   }],
                 }));
-               
+
                 await saveMessages({ messages: sanitizedResponseMessages as any });
                 // Insert into OpenAiApiUsage
                 await (db.insert(openAiApiUsage) as any).values({

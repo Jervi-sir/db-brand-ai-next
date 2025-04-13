@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Bot, Command, Settings2, SquareTerminal, TowerControlIcon, X, } from "lucide-react"
+import { Bot, Code2, Command, Settings2, SquareTerminal, TowerControlIcon, Unlock, X, } from "lucide-react"
 
 import { 
   Sidebar, SidebarContent, SidebarFooter, SidebarHeader, useSidebar, 
@@ -20,12 +20,12 @@ const data = {
       url: "/dashboard",
       icon: SquareTerminal,
     },
-    {
-      title: "Models",
-      url: "/dashboard/models",
-      icon: Bot,
+    // {
+    //   title: "Models",
+    //   url: "/dashboard/models",
+    //   icon: Bot,
 
-    },
+    // },
     {
       title: "Ai Usage",
       url: "/dashboard/ai-usage",
@@ -36,7 +36,11 @@ const data = {
       title: "Ai Settings",
       url: "/dashboard/ai-settings",
       icon: Settings2,
-
+    },
+    {
+      title: "Unlocking Codes",
+      url: "/dashboard/unlocking-codes",
+      icon: Unlock,
     },
   ],
 
@@ -108,7 +112,7 @@ export function NavMain({
         {items.map((item) => (
           <SidebarMenuItem key={item.title} className={pathname === item.url ? 'bg-neutral-950 rounded-lg' : 'rounded-lg'}>
             <SidebarMenuButton asChild tooltip={item.title}>
-              <a href={item.url}>
+              <a href={item.url} className={pathname === item.url ? 'bg-neutral-950 rounded-lg text-white' : 'rounded-lg'}>
                 <item.icon />
                 <span>{item.title}</span>
               </a>
