@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { eq, sql } from 'drizzle-orm';
+import { desc, eq, sql } from 'drizzle-orm';
 import { auth } from '@/app/(auth)/auth';
 import { codes, codeUsage } from '@/lib/db/schema';
 import { db } from '@/lib/db/queries';
@@ -28,6 +28,7 @@ export async function GET(request: Request) {
       .from(codes)
       .leftJoin(codeUsage, eq(codeUsage.codeId, codes.id))
       .groupBy(codes.id)
+      .orderBy(desc(codes.createdAt)) // Add this line to sort by recent first
       .limit(perPage)
       .offset(offset);
 
