@@ -281,7 +281,7 @@ export default function CodeManagement() {
                         <DialogHeader>
                           <DialogTitle>Delete Code</DialogTitle>
                           <DialogDescription>
-                            Are you sure you want to delete the code "{item.code}"? This action cannot be undone.
+                            Are you sure you want to delete the code &quot;{item.code}&quot;? This action cannot be undone.
                           </DialogDescription>
                         </DialogHeader>
                         <DialogFooter>
