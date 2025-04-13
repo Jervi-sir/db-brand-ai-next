@@ -16,6 +16,7 @@ import {
 } from '@/lib/db/queries';
 import {
   generateUUID,
+  getLastNMessages,
   getMostRecentUserMessage,
   sanitizeResponseMessages,
 } from '@/lib/utils';
@@ -48,7 +49,7 @@ export async function POST(request: Request) {
     }
 
     const userMessage = getMostRecentUserMessage(messages);
-
+    const messagesToSendToAi = getLastNMessages(messages, 3);
     if (!userMessage) {
       return new Response('No user message found', { status: 400 });
     }
@@ -57,9 +58,11 @@ export async function POST(request: Request) {
     const [modelDetails] = await db
       .select({
         name: aiModel.name,
-        endpoint: aiModel.endpoint,
-        apiKey: aiModel.apiKey,
+        // endpoint: aiModel.endpoint,
+        // apiKey: aiModel.apiKey,
         capability: aiModel.capability,
+        maxTokens: aiModel.maxTokens,
+        temperature: aiModel.temperature,
         customPrompts: aiModel.customPrompts,
       })
       .from(aiModel)
@@ -120,7 +123,9 @@ export async function POST(request: Request) {
         const result = streamText({
           model: openai(modelDetails.name),//myProvider.languageModel(selectedChatModel),
           system: modelDetails.customPrompts || undefined,//systemPrompt({ selectedChatModel }),
-          messages: [userMessage],
+          messages: messagesToSendToAi,
+          temperature: modelDetails.temperature as number,
+          maxTokens: modelDetails.maxTokens as number,
           maxSteps: 1,
           onFinish: async ({ response, reasoning, usage }) => {
             if (session.user?.id) {

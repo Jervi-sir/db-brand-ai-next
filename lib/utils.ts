@@ -246,6 +246,13 @@ export function getMostRecentUserMessage(messages: Array<Message>) {
   return userMessages.at(-1);
 }
 
+export function getLastNMessages(messages: Array<Message> | null | undefined, number: number): Array<Message> {
+  if (!messages || messages.length === 0) {
+    return [];
+  }
+  return messages.slice(-number);
+}
+
 export function getDocumentTimestampByIndex(
   documents: Array<Document>,
   index: number,

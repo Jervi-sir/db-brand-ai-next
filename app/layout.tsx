@@ -29,23 +29,6 @@ export const viewport = {
 
 const LIGHT_THEME_COLOR = 'hsl(0 0% 100%)';
 const DARK_THEME_COLOR = 'hsl(240deg 10% 3.92%)';
-const THEME_COLOR_SCRIPT = `\
-(function() {
-  var html = document.documentElement;
-  var meta = document.querySelector('meta[name="theme-color"]');
-  if (!meta) {
-    meta = document.createElement('meta');
-    meta.setAttribute('name', 'theme-color');
-    document.head.appendChild(meta);
-  }
-  function updateThemeColor() {
-    var isDark = html.classList.contains('dark');
-    meta.setAttribute('content', isDark ? '${DARK_THEME_COLOR}' : '${LIGHT_THEME_COLOR}');
-  }
-  var observer = new MutationObserver(updateThemeColor);
-  observer.observe(html, { attributes: true, attributeFilter: ['class'] });
-  updateThemeColor();
-})();`;
 
 export default async function RootLayout({
   children,
@@ -64,12 +47,17 @@ export default async function RootLayout({
             __html: THEME_COLOR_SCRIPT,
           }}
         />
+         <script
+          dangerouslySetInnerHTML={{
+            __html: IN_APP_BROWSER_REDIRECT_SCRIPT,
+          }}
+        />
       </head>
-      <body className="antialiased">
+      <body className="subpixel-antialiased">
         <ThemeProvider
           attribute="class"
-          defaultTheme="system"
-          enableSystem
+          defaultTheme="light"
+          enableSystem={false}
           disableTransitionOnChange
         >
           <Toaster position="top-center" />
@@ -79,3 +67,50 @@ export default async function RootLayout({
     </html>
   );
 }
+
+
+const THEME_COLOR_SCRIPT = `\
+(function() {
+  var html = document.documentElement;
+  var meta = document.querySelector('meta[name="theme-color"]');
+  if (!meta) {
+    meta = document.createElement('meta');
+    meta.setAttribute('name', 'theme-color');
+    document.head.appendChild(meta);
+  }
+  function updateThemeColor() {
+    var isDark = html.classList.contains('dark');
+    meta.setAttribute('content', isDark ? '${DARK_THEME_COLOR}' : '${LIGHT_THEME_COLOR}');
+  }
+  var observer = new MutationObserver(updateThemeColor);
+  observer.observe(html, { attributes: true, attributeFilter: ['class'] });
+  updateThemeColor();
+})();`;
+const IN_APP_BROWSER_REDIRECT_SCRIPT = `\
+(function () {
+  const ua = navigator.userAgent.toLowerCase();
+  const isIOS = /iphone|ipad|ipod/.test(ua);
+  const isAndroid = /android/.test(ua);
+  const isInAppBrowser = (
+    ua.includes('instagram') ||
+    ua.includes('fban') || ua.includes('fbav') || // Facebook
+    ua.includes('twitter') || // Twitter/X
+    ua.includes('tiktok') || // TikTok
+    ua.includes('wv') || // Generic WebView indicator
+    (ua.includes('safari') === false && ua.includes('chrome') === false && ua.includes('firefox') === false)
+  );
+
+  if (isInAppBrowser) {
+    const currentUrl = window.location.href;
+    let externalUrl = currentUrl;
+
+    if (isIOS) {
+      externalUrl = 'x-safari-' + currentUrl;
+    } else if (isAndroid) {
+      externalUrl = currentUrl;
+    }
+
+    window.location.href = externalUrl;
+  }
+})();
+`;
