@@ -156,6 +156,7 @@ export default function CodeManagement() {
         <div className="flex items-center gap-2 px-3">
           <SidebarTrigger />
           <Separator orientation="vertical" className="mr-2 h-4" />
+          <h4>Unlocking Codes</h4>
         </div>
       </header>
       <div className="p-0">

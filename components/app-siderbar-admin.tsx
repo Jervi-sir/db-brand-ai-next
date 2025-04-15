@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Bot, Code2, Command, HistoryIcon, Settings2, SquareTerminal, TowerControlIcon, Unlock, X, } from "lucide-react"
+import { Bot, ChartArea, Code2, Command, HistoryIcon, Settings2, SquareTerminal, TowerControlIcon, Unlock, X, } from "lucide-react"
 
 import { 
   Sidebar, SidebarContent, SidebarFooter, SidebarHeader, useSidebar, 
@@ -16,9 +16,9 @@ import { SidebarUserNav } from '@/components/sidebar-user-nav';
 const data = {
   navMain: [
     {
-      title: "menu1",
+      title: "Analytics",
       url: "/dashboard",
-      icon: SquareTerminal,
+      icon: ChartArea,
     },
     // {
     //   title: "Models",

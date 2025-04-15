@@ -63,6 +63,7 @@ export default function AiUsage() {
         <div className="flex items-center gap-2 px-3">
           <SidebarTrigger />
           <Separator orientation="vertical" className="mr-2 h-4" />
+          <h4>Ai Usage</h4>
         </div>
       </header>
       <div className="p-0">

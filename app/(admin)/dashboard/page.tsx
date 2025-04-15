@@ -116,6 +116,7 @@ export default function Analytics() {
         <div className="flex items-center gap-2 px-3">
           <SidebarTrigger />
           <Separator orientation="vertical" className="mr-2 h-4" />
+          <h4>Analytics</h4>
         </div>
         <div className="ml-auto mr-4 flex items-center gap-2 pt-2">
           <Label htmlFor="month">Select Month</Label>

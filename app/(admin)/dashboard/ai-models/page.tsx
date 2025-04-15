@@ -70,6 +70,7 @@ export default function AiModelPage() {
         <div className="flex items-center gap-2 px-3">
           <SidebarTrigger />
           <Separator orientation="vertical" className="mr-2 h-4" />
+          <h4>Ai Models</h4>
         </div>
       </header>
 
