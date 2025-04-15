@@ -18,6 +18,7 @@ import {
   codes,
   codeUsage,
   aiModel,
+  promptHistory,
 } from './schema';
 import { ArtifactKind } from '@/components/artifact';
 import { uuid } from 'drizzle-orm/pg-core';
@@ -542,5 +543,44 @@ export async function getChatMessageAnalytics(): Promise<
   } catch (error) {
     console.error('Fetch chat/message analytics error:', error);
     throw error;
+  }
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| save prompt into history
+|--------------------------------------------------------------------------
+*/
+export async function savePromptToHistory(modelId: string, prompt: string, userEmail?: string) {
+  try {
+    // Check if prompt already exists for this model
+    const existingPrompt = await db
+      .select()
+      .from(promptHistory)
+      .where(
+        and(
+          eq(promptHistory.modelId, modelId),
+          eq(promptHistory.prompt, prompt)
+        )
+      );
+
+    if (existingPrompt.length > 0) {
+      return null; // Don't save duplicate
+    }
+
+    const [newHistory] = await db
+      .insert(promptHistory)
+      .values({
+        modelId,
+        prompt,
+        userEmail: userEmail || null,
+      })
+      .returning();
+    
+    return newHistory;
+  } catch (error) {
+    console.error('Error saving prompt to history:', error);
+    return null;
   }
 }

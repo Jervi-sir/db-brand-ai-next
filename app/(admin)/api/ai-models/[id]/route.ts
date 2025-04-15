@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { auth } from '@/app/(auth)/auth';
 import { aiModel } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
-import { db } from '@/lib/db/queries';
+import { db, savePromptToHistory } from '@/lib/db/queries';
 
 export async function PUT(request: Request) {
   const data = await request.json();
@@ -18,6 +18,10 @@ export async function PUT(request: Request) {
       .where(eq(aiModel.id, data.id))
       .returning();
     if (!updatedModel) return new Response('Model not found', { status: 404 });
+    // Save customPrompts to history if not null
+    if (updateData.customPrompts && typeof updateData.customPrompts === 'string') {
+      await savePromptToHistory(updatedModel.id, updateData.customPrompts, session.user.email || undefined);
+    }
     return NextResponse.json(updatedModel);
   } catch (error) {
     console.error('Error updating AI model:', error);

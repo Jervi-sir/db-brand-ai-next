@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/app/(auth)/auth';
 import { aiModel } from '@/lib/db/schema';
-import { db } from '@/lib/db/queries';
+import { db, savePromptToHistory } from '@/lib/db/queries';
 
 export async function GET(request: Request) {
   const session = await auth();
@@ -23,6 +23,10 @@ export async function POST(request: Request) {
   try {
     const data = await request.json();
     const [newModel] = await db.insert(aiModel).values(data).returning();
+
+    if (data.customPrompts && typeof data.customPrompts === 'string') {
+      await savePromptToHistory(newModel.id, data.customPrompts, session.user.email || undefined);
+    }
     return NextResponse.json(newModel);
   } catch (error) {
     console.error('Error creating AI model:', error);

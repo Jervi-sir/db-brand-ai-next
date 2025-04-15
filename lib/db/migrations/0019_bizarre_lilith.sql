@@ -1,0 +1,1 @@
+ALTER TABLE "PromptHistory" RENAME COLUMN "userId" TO "userEmail";

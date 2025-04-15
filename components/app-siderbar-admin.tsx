@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Bot, Code2, Command, Settings2, SquareTerminal, TowerControlIcon, Unlock, X, } from "lucide-react"
+import { Bot, Code2, Command, HistoryIcon, Settings2, SquareTerminal, TowerControlIcon, Unlock, X, } from "lucide-react"
 
 import { 
   Sidebar, SidebarContent, SidebarFooter, SidebarHeader, useSidebar, 
@@ -36,6 +36,11 @@ const data = {
       title: "Ai Models",
       url: "/dashboard/ai-models",
       icon: Settings2,
+    },
+    {
+      title: "Ai Prompt History",
+      url: "/dashboard/ai-prompt-history",
+      icon: HistoryIcon,
     },
     {
       title: "Unlocking Codes",

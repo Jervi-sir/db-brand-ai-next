@@ -126,7 +126,7 @@ export type OpenAiApiUsage = InferSelectModel<typeof openAiApiUsage>;
 
 /*
 |--------------------------------------------------------------------------
-| added
+| Subscription plans
 |--------------------------------------------------------------------------
 */
 export const subscriptionPlan = pgTable('SubscriptionPlan', {
@@ -234,4 +234,18 @@ export const codeUsageRelations = relations(codeUsage, ({ one }) => ({
 export type Code = InferSelectModel<typeof codes>;
 export type CodeUsage = InferSelectModel<typeof codeUsage>;
 
+
+/*
+|--------------------------------------------------------------------------
+| ai models
+|--------------------------------------------------------------------------
+*/
+export const promptHistory = pgTable('PromptHistory', {
+  id: uuid('id').primaryKey().notNull().defaultRandom(),
+  modelId: uuid('modelId').notNull().references(() => aiModel.id, { onDelete: 'cascade' }),
+  prompt: text('prompt').notNull(),
+  createdAt: timestamp('createdAt').notNull().defaultNow(),
+  userEmail: varchar('userEmail', { length: 128 }), // Optional, if you want to track users
+});
+export type PromptHistory = InferSelectModel<typeof promptHistory>;
 
