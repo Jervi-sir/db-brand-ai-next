@@ -36,6 +36,13 @@ export function Chat({
   const usedCode = useLockStore((state: any) => state.usedCode);
   const [selectedModelID, setSelectedModelID] = useState(selectedChatModelID); // Manage local state
 
+  const { data: activeModels, error: modelsError } = useSWR<
+    Array<{ id: string; name: string; description: string }>
+  >('/api/ai-active-models', fetcher, {
+    revalidateOnFocus: false,
+    fallbackData: [],
+  });
+
   const {
     messages,
     setMessages,
@@ -84,9 +91,22 @@ export function Chat({
   // const [attachments, setAttachments] = useState<Array<Attachment>>([]);
   const isArtifactVisible = useArtifactSelector((state) => state.isVisible);
   const isUnlocked = useLockStore((state: any) => state.isUnlocked);
+  // Check if selectedModelID is valid (exists in active models)
+  const isValidModel = activeModels?.some((model) => model.id === selectedModelID);
+
   const handleModelChange = (modelId: string) => {
     setSelectedModelID(modelId);
   };
+
+  useEffect(() => {
+    // If no valid model is selected and active models are available, select the first one
+    if (activeModels) {
+      if (!selectedModelID && activeModels?.length > 0) {
+        setSelectedModelID(activeModels[0].id);
+      }
+    }
+  }, [activeModels, selectedModelID]);
+
 
   return (
     <>
@@ -113,7 +133,7 @@ export function Chat({
         <form className="flex mx-auto px-4 bg-background pb-4 md:pb-6 gap-2 w-full md:max-w-3xl">
           {isUnlocked ? (
             !isReadonly ? (
-              selectedModelID ? (
+              isValidModel ? (
                 <MultimodalInput
                   chatId={id}
                   input={input}
@@ -126,7 +146,15 @@ export function Chat({
                   append={append}
                 />
               ) : (
-                <p className="text-red-500 text-sm">Please select a model to continue.</p>
+                <div className="relative w-full flex flex-col gap-4">
+                  <div className='h-[5rem] rounded-2xl dark:bg-zinc-950 pb-2 pt-4 border border-1 dark:border-neutral-900'>
+                    <p className="text-red-500 text-sm pl-4 pt-1">
+                      {activeModels && activeModels?.length > 0
+                        ? 'Please select a model to continue.'
+                        : 'No active models available.'}
+                    </p>
+                  </div>
+                </div>
               )
             ) : null
           ) : (

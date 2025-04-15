@@ -170,6 +170,9 @@ export const aiModel = pgTable('AIModel', {
 
   customPrompts: text('customPrompts'), // Nullable
 
+  inputPrice: decimal('inputPrice', { precision: 10, scale: 4 }), 
+  outputPrice: decimal('outputPrice', { precision: 10, scale: 4 }),
+  cachedInputPrice: decimal('cachedInputPrice', { precision: 10, scale: 4 }),
 });
 
 export type AIModel = InferSelectModel<typeof aiModel>;

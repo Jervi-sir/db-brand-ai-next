@@ -14,12 +14,12 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrig
 import { DeleteConfirmationDialog } from "./delete-confirmation-dialog";
 
 const modelOptions = [
-  { name: "gpt-4.1-nano-2025-04-14", inputPrice: 0.10, outputPrice: 0.40 },
-  { name: "gpt-4.1-mini-2025-04-14", inputPrice: 0.40, outputPrice: 1.60 },
-  { name: "gpt-4.1-2025-04-14", inputPrice: 2.00, outputPrice: 8.00 },
-  { name: "gpt-4o-2024-11-20", inputPrice: 2.50, outputPrice: 10.00 },
-  { name: "gpt-4o-mini-2024-07-18", inputPrice: 0.15, outputPrice: 0.60 },
-  // { name: "chatgpt-4o-latest", inputPrice: 5.00, outputPrice: 15.00 }
+  { name: "gpt-4.1-nano-2025-04-14", inputPrice: 0.10, outputPrice: 0.40, cachedInputPrice: 0.00 },
+  { name: "gpt-4.1-mini-2025-04-14", inputPrice: 0.40, outputPrice: 1.60, cachedInputPrice: 0.00 },
+  { name: "gpt-4.1-2025-04-14", inputPrice: 2.00, outputPrice: 8.00, cachedInputPrice: 0.00 },
+  { name: "gpt-4o-2024-11-20", inputPrice: 2.50, outputPrice: 10.00, cachedInputPrice: 0.00 },
+  { name: "gpt-4o-mini-2024-07-18", inputPrice: 0.15, outputPrice: 0.60, cachedInputPrice: 0.00 },
+  // { name: "chatgpt-4o-latest", inputPrice: 5.00, outputPrice: 15.00, cachedInputPrice: 0.00 }
 ];
 
 export default function AiModelPage() {
@@ -50,18 +50,18 @@ export default function AiModelPage() {
 
   const sidebarNavItems = models.map((model) => ({
     title: model.displayName || model.name,
-    href: `/dashboard/ai-settings?id=${model.id}`,
+    href: `/dashboard/ai-models?id=${model.id}`,
     icon: null,
   }));
 
   const handleSelectModel = (model: any) => {
     setSelectedModel(model);
-    router.push(`/dashboard/ai-settings?id=${model.id}`);
+    router.push(`/dashboard/ai-models?id=${model.id}`);
   };
 
   const handleCreateNew = () => {
     setSelectedModel(null); // Clear selection for new model form
-    router.push('/dashboard/ai-settings'); // Reset URL or use a dedicated create route
+    router.push('/dashboard/ai-models'); // Reset URL or use a dedicated create route
   };
 
   return (
@@ -135,6 +135,11 @@ function FormData({ model, onModelUpdate, setSelectedModel }: any) {
     setFormData((prev: any) => ({ ...prev, [name]: checked }));
   };
 
+
+  // Find the selected model's pricing data
+  const selectedModelOption = modelOptions.find((option) => option.name === formData?.name) || { inputPrice: 0, outputPrice: 0, cachedInputPrice: 0 };
+
+
   const handleSave = async () => {
     try {
       const method = formData.id ? 'PUT' : 'POST';
@@ -142,7 +147,14 @@ function FormData({ model, onModelUpdate, setSelectedModel }: any) {
       const response = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        // body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          inputPrice: parseFloat(selectedModelOption.inputPrice.toFixed(2)),
+          outputPrice: parseFloat(selectedModelOption.outputPrice.toFixed(2)),
+          cachedInputPrice: parseFloat(selectedModelOption.cachedInputPrice.toFixed(2)),
+        }),
+
         credentials: 'include',
       });
       if (!response.ok) throw new Error('Failed to save model');
@@ -155,7 +167,7 @@ function FormData({ model, onModelUpdate, setSelectedModel }: any) {
 
       setFormData(updatedModel);
       setIsEditing(false);
-      if (!model) router.push(`/dashboard/ai-settings?id=${updatedModel.id}`);
+      if (!model) router.push(`/dashboard/ai-models?id=${updatedModel.id}`);
     } catch (error) {
       console.error('Error saving AI model:', error);
     }
@@ -174,16 +186,13 @@ function FormData({ model, onModelUpdate, setSelectedModel }: any) {
       onModelUpdate(updatedModels);
       setFormData({});
       setSelectedModel(null);
-      router.push('/dashboard/ai-settings');
+      router.push('/dashboard/ai-models');
     } catch (error) {
       console.error('Error deleting AI model:', error);
     } finally {
       setIsDeleteDialogOpen(false); // Close dialog regardless of outcome
     }
   };
-
-  // Find the selected model's pricing data
-  const selectedModelOption = modelOptions.find((option) => option.name === formData?.name);
 
   return (
     <>

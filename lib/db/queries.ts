@@ -17,6 +17,7 @@ import {
   vote,
   codes,
   codeUsage,
+  aiModel,
 } from './schema';
 import { ArtifactKind } from '@/components/artifact';
 import { uuid } from 'drizzle-orm/pg-core';
@@ -543,4 +544,3 @@ export async function getChatMessageAnalytics(): Promise<
     throw error;
   }
 }
-

@@ -34,7 +34,7 @@ const data = {
     },
     {
       title: "Ai Models",
-      url: "/dashboard/ai-settings",
+      url: "/dashboard/ai-models",
       icon: Settings2,
     },
     {

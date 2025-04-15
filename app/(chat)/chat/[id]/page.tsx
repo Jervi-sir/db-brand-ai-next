@@ -9,7 +9,7 @@ import { DataStreamHandler } from '@/components/data-stream-handler';
 import { aiModel } from '@/lib/db/schema';
 import { and, eq } from 'drizzle-orm';
 
-const DEFAULT_CHAT_MODEL = 'gpt-4.1-nano-2025-04-14'; // Fallback model ID if needed
+const DEFAULT_CHAT_MODEL = '';
 
 export default async function Page(props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
@@ -39,41 +39,36 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
   let selectedChatModelID = DEFAULT_CHAT_MODEL;
   // Check the first message's model and fetch from aiModel table
   if (messagesFromDb.length > 0 && messagesFromDb[0].model) {
-    const messageModel = messagesFromDb[0].model || selectedChatModelID;
-    // Query aiModel table for the model details
-    let dbModel = await db
+    const messageModelName = messagesFromDb[0].model;
+    // Query aiModel table for the model by name
+    const dbModel = await db
       .select({
         id: aiModel.id,
         name: aiModel.name,
       })
       .from(aiModel)
-      .where(and(eq(aiModel.name, messageModel), eq(aiModel.isActive, true)))
+      .where(and(eq(aiModel.name, messageModelName), eq(aiModel.isActive, true)))
       .limit(1);
-  
+
     if (dbModel.length > 0) {
-      // Use the model from the database
       selectedChatModelID = dbModel[0].id;
-    } else {
-      // Fallback: Fetch the first active model from aiModel table
-      dbModel = await db
-        .select({
-          id: aiModel.id,
-          name: aiModel.name,
-          // description: aiModel.description,
-        })
-        .from(aiModel)
-        .where(eq(aiModel.isActive, true))
-        .orderBy(aiModel.createdAt) // Optional: Ensure consistent ordering
-        .limit(1);
-  
-      if (dbModel.length > 0) {
-        selectedChatModelID = dbModel[0].id;
-      } else {
-        // Optional: Handle case where no active models exist
-        selectedChatModelID = selectedChatModelID || ''; // Keep original or set to empty
-      }
     }
   }
+
+  // If no model selected yet, try to select the first active model
+  if (!selectedChatModelID) {
+    const dbModel = await db
+      .select({
+        id: aiModel.id,
+      })
+      .from(aiModel)
+      .where(eq(aiModel.isActive, true))
+      .orderBy(aiModel.createdAt)
+      .limit(1);
+
+    selectedChatModelID = dbModel.length > 0 ? dbModel[0].id : '';
+  }
+
 
   // if (!chatModelIDFromCookie) {
     return (

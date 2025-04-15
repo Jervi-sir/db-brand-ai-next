@@ -1,0 +1,1 @@
+ALTER TABLE "AIModel" RENAME COLUMN "catchedInputPrice" TO "cachedInputPrice";
