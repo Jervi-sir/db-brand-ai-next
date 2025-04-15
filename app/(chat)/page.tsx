@@ -18,7 +18,7 @@ export default async function Page() {
           key={id}
           id={id}
           initialMessages={[]}
-          selectedChatModel={DEFAULT_CHAT_MODEL}
+          selectedChatModelID={DEFAULT_CHAT_MODEL}
           selectedVisibilityType="private"
           isReadonly={false}
         />
@@ -33,7 +33,7 @@ export default async function Page() {
         key={id}
         id={id}
         initialMessages={[]}
-        selectedChatModel={modelIdFromCookie.value}
+        selectedChatModelID={modelIdFromCookie.value}
         selectedVisibilityType="private"
         isReadonly={false}
       />

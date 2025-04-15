@@ -8,26 +8,34 @@ import { SidebarToggle } from '@/components/sidebar-toggle';
 import { Button } from '@/components/ui/button';
 import { PlusIcon, ShareIcon, VercelIcon } from './icons';
 import { useSidebar } from './ui/sidebar';
-import { memo, useState } from 'react';
+import { memo, useEffect, useState } from 'react';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 import { VisibilityType, VisibilitySelector } from './visibility-selector';
 import { toast } from './toast';
+import { ChatToneSettings } from '@/app/(chat)/sheet';
+import { useSession } from 'next-auth/react';
 
 function PureChatHeader({
   chatId,
-  selectedModelId,
+  selectedModelID,
   selectedVisibilityType,
   isReadonly,
+  onModelChange, // Add the callback prop
 }: {
   chatId: string;
-  selectedModelId: string;
+  selectedModelID: string;
   selectedVisibilityType: VisibilityType;
   isReadonly: boolean;
+  onModelChange?: (modelId: string) => void; // Define the callback type
 }) {
   const router = useRouter();
   const { open } = useSidebar();
   const { width: windowWidth } = useWindowSize();
-  const [locallyIsPublic, setLocallyIsPublic] = useState(selectedVisibilityType === 'public')
+  const [locallyIsPublic, setLocallyIsPublic] = useState(selectedVisibilityType === 'public');
+
+  const { data: session, status } = useSession();
+  const isAdmin = (session?.user as any)?.role === 'admin';
+
   const handleShare = async () => {
     const shareUrl = `${window.location.origin}/chat/${chatId}`; // Adjust URL structure as needed
 
@@ -83,7 +91,8 @@ function PureChatHeader({
 
       {!isReadonly && (
         <ModelSelector
-          selectedModelId={selectedModelId}
+          selectedModelID={selectedModelID}
+          onModelChange={onModelChange} // Pass the callback to ModelSelector
           className="order-1 md:order-2"
         />
       )}
@@ -94,7 +103,7 @@ function PureChatHeader({
           selectedVisibilityType={selectedVisibilityType}
           className="order-1 md:order-3"
           handleOnSelected={(e) => {
-            setLocallyIsPublic(e === 'public')
+            setLocallyIsPublic(e === 'public');
           }}
         />
       )}
@@ -114,13 +123,21 @@ function PureChatHeader({
           <TooltipContent>Share Chat</TooltipContent>
         </Tooltip>
       )}
+
+      {isAdmin
+        &&
+        <div className="ml-auto order-last">
+          <ChatToneSettings />
+        </div>
+      }
+
     </header>
   );
 }
 
 export const ChatHeader = memo(PureChatHeader, (prevProps, nextProps) => {
   return (
-    prevProps.selectedModelId === nextProps.selectedModelId &&
+    prevProps.selectedModelID === nextProps.selectedModelID &&
     prevProps.selectedVisibilityType === nextProps.selectedVisibilityType
   );
 });

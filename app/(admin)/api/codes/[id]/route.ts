@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/app/(auth)/auth';
 import { eq } from 'drizzle-orm';
-import { codes } from '@/lib/db/schema';
+import { codes, codeUsage } from '@/lib/db/schema';
 import { db } from '@/lib/db/queries';
 
 export async function PUT(
@@ -52,18 +52,32 @@ export async function DELETE(
 
   try {
     const { id } = await params; // Await params to access id
-    const result = await db
-      .delete(codes)
-      .where(eq(codes.id, id))
-      .returning({ id: codes.id });
 
-    if (result.length === 0) {
-      return NextResponse.json({ error: 'Code not found' }, { status: 404 });
-    }
+    // Start a transaction to ensure atomicity
+    await db.transaction(async (tx) => {
+      // Step 1: Delete related CodeUsage records
+      await tx
+        .delete(codeUsage)
+        .where(eq(codeUsage.codeId, id));
+
+      // Step 2: Delete the Codes record
+      const result = await tx
+        .delete(codes)
+        .where(eq(codes.id, id))
+        .returning({ id: codes.id });
+
+      if (result.length === 0) {
+        throw new Error('Code not found');
+      }
+    });
 
     return NextResponse.json({ message: 'Code deleted' }, { status: 200 });
   } catch (error) {
     console.error('Delete code error:', error);
+    if (error instanceof Error && error.message === 'Code not found') {
+      return NextResponse.json({ error: 'Code not found' }, { status: 404 });
+    }
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }
 }
+

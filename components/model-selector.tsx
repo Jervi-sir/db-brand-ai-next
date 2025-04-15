@@ -13,13 +13,15 @@ import { cn } from '@/lib/utils';
 import { CheckCircleFillIcon, ChevronDownIcon } from './icons';
 
 export function ModelSelector({
-  selectedModelId,
+  selectedModelID,
+  onModelChange, // Add the callback prop
   className,
 }: {
-  selectedModelId: string;
+  selectedModelID: string;
+  onModelChange?: (modelId: string) => void; // Define the callback type
 } & React.ComponentProps<typeof Button>) {
   const [open, setOpen] = useState(false);
-  const [optimisticModelId, setOptimisticModelId] = useOptimistic(selectedModelId || '');
+  const [optimisticModelId, setOptimisticModelId] = useOptimistic(selectedModelID || '');
   const [models, setModels] = useState<{ id: string; name: string; description: string }[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -28,17 +30,18 @@ export function ModelSelector({
     const fetchModels = async () => {
       setLoading(true);
       try {
-        const response = await fetch('/api/ai-models', { credentials: 'include' });
+        const response = await fetch('/api/ai-active-models', { credentials: 'include' });
         if (!response.ok) throw new Error('Failed to fetch models');
         const data = await response.json();
         setModels(data);
 
         // If no model is selected and models are available, select the first one
-        if (!selectedModelId && data.length > 0) {
+        if (!selectedModelID && data.length > 0) {
           const firstModelId = data[0].id;
           startTransition(() => {
             setOptimisticModelId(firstModelId);
             saveChatModelAsCookie(firstModelId);
+            onModelChange?.(firstModelId); // Notify parent
           });
         }
       } catch (error) {
@@ -48,7 +51,7 @@ export function ModelSelector({
       }
     };
     fetchModels();
-  }, [selectedModelId]);
+  }, [selectedModelID, onModelChange]);
 
   const selectedChatModel: any = useMemo(
     () => models.find((chatModel) => chatModel.id === optimisticModelId),
@@ -93,6 +96,7 @@ export function ModelSelector({
                   startTransition(() => {
                     setOptimisticModelId(id);
                     saveChatModelAsCookie(id);
+                    onModelChange?.(id); // Notify parent
                   });
                 }}
                 data-active={id === optimisticModelId}

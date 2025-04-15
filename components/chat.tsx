@@ -22,18 +22,19 @@ import { ArrowUpIcon, Unlock } from 'lucide-react';
 export function Chat({
   id,
   initialMessages,
-  selectedChatModel,
+  selectedChatModelID,
   selectedVisibilityType,
   isReadonly,
 }: {
   id: string;
   initialMessages: Array<Message>;
-  selectedChatModel: string;
+  selectedChatModelID: string;
   selectedVisibilityType: VisibilityType;
   isReadonly: boolean;
 }) {
   const { mutate } = useSWRConfig();
   const usedCode = useLockStore((state: any) => state.usedCode);
+  const [selectedModelID, setSelectedModelID] = useState(selectedChatModelID); // Manage local state
 
   const {
     messages,
@@ -47,7 +48,7 @@ export function Chat({
     reload,
   }: any = useChat({
     id,
-    body: { id, selectedChatModelID: selectedChatModel, usedCode: usedCode },
+    body: { id, selectedChatModelID: selectedChatModelID, usedCode: usedCode },
     initialMessages,
     experimental_throttle: 100,
     sendExtraMessageFields: true,
@@ -80,19 +81,22 @@ export function Chat({
   //   fetcher,
   // );
 
-  const [attachments, setAttachments] = useState<Array<Attachment>>([]);
+  // const [attachments, setAttachments] = useState<Array<Attachment>>([]);
   const isArtifactVisible = useArtifactSelector((state) => state.isVisible);
-
   const isUnlocked = useLockStore((state: any) => state.isUnlocked);
+  const handleModelChange = (modelId: string) => {
+    setSelectedModelID(modelId);
+  };
 
   return (
     <>
       <div className="flex flex-col min-w-0 h-dvh bg-background">
         <ChatHeader
           chatId={id}
-          selectedModelId={selectedChatModel}
+          selectedModelID={selectedChatModelID}
           selectedVisibilityType={selectedVisibilityType}
           isReadonly={isReadonly}
+          onModelChange={handleModelChange} // Pass callback to ChatHeader
         />
 
         <Messages
@@ -107,24 +111,27 @@ export function Chat({
         />
 
         <form className="flex mx-auto px-4 bg-background pb-4 md:pb-6 gap-2 w-full md:max-w-3xl">
-          {isUnlocked
-            ? !isReadonly && (
-              <MultimodalInput
-                chatId={id}
-                input={input}
-                setInput={setInput}
-                handleSubmit={handleSubmit}
-                status={status}
-                stop={stop}
-                // attachments={attachments}
-                // setAttachments={setAttachments}
-                messages={messages}
-                setMessages={setMessages}
-                append={append}
-              />
-            )
-            : <UnlockInput />
-          }
+          {isUnlocked ? (
+            !isReadonly ? (
+              selectedModelID ? (
+                <MultimodalInput
+                  chatId={id}
+                  input={input}
+                  setInput={setInput}
+                  handleSubmit={handleSubmit}
+                  status={status}
+                  stop={stop}
+                  messages={messages}
+                  setMessages={setMessages}
+                  append={append}
+                />
+              ) : (
+                <p className="text-red-500 text-sm">Please select a model to continue.</p>
+              )
+            ) : null
+          ) : (
+            <UnlockInput />
+          )}
         </form>
       </div>
 
@@ -151,36 +158,46 @@ export function Chat({
 
 const UnlockInput = () => {
   const [input, setInput] = useState('');
+  const [isLoading, setIsLoading] = useState(false); // New loading state
   const isUnlocked = useLockStore((state: any) => state.isUnlocked);
   const error = useLockStore((state: any) => state.error);
   const reset = useLockStore((state: any) => state.reset);
   const unlock = useLockStore((state: any) => state.unlock);
   const loadFromSession = useLockStore((state: any) => state.loadFromSession);
-  
+
   const handleUnlock = async () => {
     if (!input.trim()) return;
-    await unlock(input);
-    if (isUnlocked) {
-      setInput(''); // Clear input on success
+    setIsLoading(true); // Set loading state
+    try {
+      await unlock(input);
+      if (isUnlocked) {
+        setInput(''); // Clear input on success
+      }
+    } finally {
+      setIsLoading(false); // Clear loading state
     }
   };
+
   const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (event.key === 'Enter' && !event.shiftKey) {
-      event.preventDefault();
-      handleUnlock();
+    if (event.key === 'Enter') {
+      event.preventDefault(); // Prevent newline
+      handleUnlock(); // Trigger unlock on Enter
     }
   };
+
   useEffect(() => {
     loadFromSession();
-    setTimeout(() => {
-    if(!isUnlocked) {
-        reset()
+    const timer = setTimeout(() => {
+      if (!isUnlocked) {
+        reset();
       }
     }, 3000);
-  }, [])
+    return () => clearTimeout(timer); // Cleanup timer
+  }, [isUnlocked, loadFromSession, reset]);
+
   return (
     <div className="relative w-full flex flex-col gap-4">
-      <div className='relative'>
+      <div className="relative">
         <Textarea
           data-testid="multimodal-input"
           placeholder={isUnlocked ? 'Unlocked! Send a message...' : 'Enter unlock code...'}
@@ -197,20 +214,44 @@ const UnlockInput = () => {
         />
         <div className="absolute top-0 right-0 p-2 pt-4 w-fit flex flex-row justify-end">
           <Button
-            type='button'
+            type="button"
             data-testid="send-button"
-            className="rounded-lg p-1.5 h-8 px-2 border dark:border-zinc-900"
+            className="rounded-lg p-1.5 h-8 px-2 border dark:border-zinc-900 flex items-center gap-1"
             onClick={handleUnlock}
-            disabled={isUnlocked || !input.trim()} // Disable if unlocked or input is empty
+            disabled={isUnlocked || !input.trim() || isLoading} // Disable during loading
           >
-            <Unlock size={16} />
-            <span>{isUnlocked ? 'Unlocked' : 'Unlock'}</span>
+            {isLoading ? (
+              <svg
+                className="animate-spin h-4 w-4 text-gray-500"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                />
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                />
+              </svg>
+            ) : (
+              <Unlock size={16} />
+            )}
+            <span>{isUnlocked ? 'Unlocked' : isLoading ? 'Unlocking...' : 'Unlock'}</span>
           </Button>
         </div>
-        <div className='absolute bottom-0 left-0 pb-4 pl-4'>
+        <div className="absolute bottom-0 left-0 pb-4 pl-4">
           {error && <p className="text-red-500 text-sm">{error}</p>}
         </div>
       </div>
     </div>
+
   )
 }

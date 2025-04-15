@@ -19,9 +19,14 @@ import {
 } from '@/components/ui/sidebar';
 import Link from 'next/link';
 import { ExtendedUser } from '@/app/(auth)/auth';
+import { useRouter } from 'next/navigation';
 
 export function SidebarUserNav({ user }: { user: ExtendedUser }) {
   const { setTheme, theme } = useTheme();
+  const router = useRouter(); // Initialize useRouter
+  const goToDashboard = () => {
+    router.push('/dashboard'); // Programmatically navigate to dashboard
+  };
 
   return (
     <SidebarMenu>
@@ -44,15 +49,14 @@ export function SidebarUserNav({ user }: { user: ExtendedUser }) {
             side="top"
             className="w-[--radix-popper-anchor-width]"
           >
-            {user.role === 'admin'
-              && <DropdownMenuItem
+             {user.role === 'admin' && (
+              <DropdownMenuItem
                 className="cursor-pointer"
+                onSelect={goToDashboard} // Call function on select
               >
-                <Link href='/dashboard'>
-                  Go to Dashboard
-                </Link>
+                Go to Dashboard
               </DropdownMenuItem>
-            }
+            )}
             <DropdownMenuItem
               className="cursor-pointer"
               onSelect={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
