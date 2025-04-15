@@ -70,7 +70,7 @@ export default function AiUsage() {
           <TableCaption>A list of your recent OpenAI API usage.</TableCaption>
           <TableHeader>
             <TableRow>
-              <TableHead>ID</TableHead>
+              {/* <TableHead>ID</TableHead> */}
               <TableHead>Chat ID</TableHead>
               <TableHead>Model</TableHead>
               <TableHead>Type</TableHead>
@@ -85,7 +85,7 @@ export default function AiUsage() {
             {usage?.data?.length > 0 ? (
               usage.data.map((item: any) => (
                 <TableRow key={item.id}>
-                  <TableCell>{item.id}</TableCell>
+                  {/* <TableCell className='whitespace-nowrap max-w-[100px] truncate'>{item.id}</TableCell> */}
                   <TableCell className="whitespace-nowrap max-w-[100px] truncate">
                     {item.chatId || 'N/A'}
                   </TableCell>

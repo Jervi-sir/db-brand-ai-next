@@ -10,6 +10,16 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
+
+const modelOptions = [
+  { name: "gpt-4.1-nano-2025-04-14", inputPrice: 0.10, outputPrice: 0.40 },
+  { name: "gpt-4.1-mini-2025-04-14", inputPrice: 0.40, outputPrice: 1.60 },
+  { name: "gpt-4.1-2025-04-14", inputPrice: 2.00, outputPrice: 8.00 },
+  { name: "gpt-4o-2024-11-20", inputPrice: 2.50, outputPrice: 10.00 },
+  { name: "gpt-4o-mini-2024-07-18", inputPrice: 0.15, outputPrice: 0.60 },
+  // { name: "chatgpt-4o-latest", inputPrice: 5.00, outputPrice: 15.00 }
+];
 
 export default function AiModelPage() {
   const [models, setModels] = useState<any[]>([]);
@@ -110,6 +120,10 @@ function FormData({ model, onModelUpdate, setSelectedModel }: any) {
     setIsEditing(!model); // Reset editing state when model changes
   }, [model]);
 
+  const handleSelectChange = (value: string) => {
+    setFormData((prev: any) => ({ ...prev, name: value }));
+  };
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prev: any) => ({ ...prev, [name]: value }));
@@ -164,6 +178,9 @@ function FormData({ model, onModelUpdate, setSelectedModel }: any) {
     }
   };
 
+  // Find the selected model's pricing data
+  const selectedModelOption = modelOptions.find((option) => option.name === formData?.name);
+
   return (
     <>
       <div className="space-y-6">
@@ -193,7 +210,7 @@ function FormData({ model, onModelUpdate, setSelectedModel }: any) {
               disabled={!isEditing}
             />
           </div>
-          <div className="grid grid-cols-4 items-center gap-4">
+          {/* <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="provider" className="text-right">Provider</Label>
             <Input
               id="provider"
@@ -203,18 +220,48 @@ function FormData({ model, onModelUpdate, setSelectedModel }: any) {
               className="col-span-3"
               disabled={!isEditing}
             />
-          </div>
+          </div> */}
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="name" className="text-right">Name</Label>
-            <Input
-              id="name"
-              name="name"
-              value={formData?.name || ''}
-              onChange={handleInputChange}
-              className="col-span-3"
+            <Select
+              value={formData?.name || ""}
+              onValueChange={handleSelectChange}
               disabled={!isEditing}
-            />
+            >
+              <SelectTrigger className="col-span-3">
+                <SelectValue placeholder="Select a model" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectLabel>Models</SelectLabel>
+                  {modelOptions.map((option) => (
+                    <SelectItem key={option.name} value={option.name}>
+                      {option.name}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
           </div>
+          {selectedModelOption && (
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="name" className="text-right"></Label>
+              <div className="col-span-3 flex gap-4">
+                <div className="flex items-center gap-4">
+                  <Label className="text-right">Input Price</Label>
+                  <div className="">
+                    ${selectedModelOption.inputPrice.toFixed(2)}
+                  </div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <Label className="text-right">Output Price</Label>
+                  <div className="">
+                    ${selectedModelOption.outputPrice.toFixed(2)}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="type" className="text-right">Type</Label>
             <Input
@@ -226,7 +273,7 @@ function FormData({ model, onModelUpdate, setSelectedModel }: any) {
               disabled={!isEditing}
             />
           </div>
-          <div className="grid grid-cols-4 items-center gap-4">
+          {/* <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="endpoint" className="text-right">Endpoint</Label>
             <Input
               id="endpoint"
@@ -236,8 +283,8 @@ function FormData({ model, onModelUpdate, setSelectedModel }: any) {
               className="col-span-3"
               disabled={!isEditing}
             />
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
+          </div> */}
+          {/* <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="apiKey" className="text-right">API Key</Label>
             <Input
               id="apiKey"
@@ -247,8 +294,8 @@ function FormData({ model, onModelUpdate, setSelectedModel }: any) {
               className="col-span-3"
               disabled={!isEditing}
             />
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
+          </div> */}
+          {/* <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="capability" className="text-right">Capability</Label>
             <Input
               id="capability"
@@ -258,7 +305,7 @@ function FormData({ model, onModelUpdate, setSelectedModel }: any) {
               className="col-span-3"
               disabled={!isEditing}
             />
-          </div>
+          </div> */}
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="isActive" className="text-right">Active</Label>
             <Switch

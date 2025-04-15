@@ -24,7 +24,7 @@ export async function generateTitleFromUserMessage({
   message: Message;
 }) {
   const { text: title, usage } = await generateText({
-    model: openai('gpt-4o-mini'),
+    model: openai('gpt-4.1-nano-2025-04-14'),
     system: `\n
     - you will generate a short title based on the first message a user begins a conversation with
     - ensure it is not more than 30 characters long

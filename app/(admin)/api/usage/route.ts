@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 import { auth } from '@/app/(auth)/auth';
 import { openAiApiUsage } from '@/lib/db/schema'; // Your schema
 import { db } from '@/lib/db/queries';
-import { count } from 'drizzle-orm';
+import { count, desc } from 'drizzle-orm';
 
 export async function GET(request: Request) {
   const session = await auth();
@@ -22,6 +22,7 @@ export async function GET(request: Request) {
     const usageRecords = await db
       .select()
       .from(openAiApiUsage)
+      .orderBy(desc(openAiApiUsage.createdAt)) // Add this line to sort by recent first
       .limit(perPage)
       .offset(offset);
 

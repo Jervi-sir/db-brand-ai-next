@@ -156,9 +156,9 @@ export type UserSubscription = InferSelectModel<typeof userSubscription>;
 export const aiModel = pgTable('AIModel', {
   id: uuid('id').primaryKey().notNull().defaultRandom(),
   name: varchar('name', { length: 64 }).notNull(), // e.g., "Copywriting AI"
-  endpoint: varchar('endpoint', { length: 256 }).notNull(),
+  endpoint: varchar('endpoint', { length: 256 }),
   apiKey: varchar('apiKey', { length: 128 }),
-  capability: text('capability').notNull(), // Free-text, e.g., "copywriting"
+  capability: text('capability'), // Free-text, e.g., "copywriting"
   createdAt: timestamp('createdAt').notNull().defaultNow(),
 
   provider: varchar('provider', { length: 64 }).notNull().default('openai'),

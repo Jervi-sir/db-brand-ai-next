@@ -100,7 +100,7 @@ export async function POST(request: Request) {
         await (db.insert(openAiApiUsage) as any).values({
           id: generateUUID(),
           chatId: id || null,
-          model: 'gpt-4o-mini',
+          model: 'gpt-4.1-nano-2025-04-14',
           type: 'title-generation',
           promptTokens: usage?.promptTokens || 0,
           completionTokens: usage?.completionTokens || 0,
