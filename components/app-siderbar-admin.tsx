@@ -33,7 +33,7 @@ const data = {
 
     },
     {
-      title: "Ai Settings",
+      title: "Ai Models",
       url: "/dashboard/ai-settings",
       icon: Settings2,
     },

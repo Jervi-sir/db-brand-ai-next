@@ -11,6 +11,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { DeleteConfirmationDialog } from "./delete-confirmation-dialog";
 
 const modelOptions = [
   { name: "gpt-4.1-nano-2025-04-14", inputPrice: 0.10, outputPrice: 0.40 },
@@ -114,6 +115,7 @@ function FormData({ model, onModelUpdate, setSelectedModel }: any) {
   const [formData, setFormData] = useState(model || {});
   const [isEditing, setIsEditing] = useState(!model); // Auto-edit for new models
   const router = useRouter();
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false); // State for dialog
 
   useEffect(() => {
     setFormData(model || {});
@@ -175,6 +177,8 @@ function FormData({ model, onModelUpdate, setSelectedModel }: any) {
       router.push('/dashboard/ai-settings');
     } catch (error) {
       console.error('Error deleting AI model:', error);
+    } finally {
+      setIsDeleteDialogOpen(false); // Close dialog regardless of outcome
     }
   };
 
@@ -191,7 +195,10 @@ function FormData({ model, onModelUpdate, setSelectedModel }: any) {
               {isEditing ? 'Stop Editing' : 'Enable Edit'}
             </Button>
             {formData.id && (
-              <Button variant="destructive" onClick={handleDelete}>
+                <Button
+                  variant="destructive"
+                  onClick={() => setIsDeleteDialogOpen(true)} // Open dialog instead of deleting
+                >
                 Delete
               </Button>
             )}
@@ -360,6 +367,15 @@ function FormData({ model, onModelUpdate, setSelectedModel }: any) {
           </div>
         </div>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <DeleteConfirmationDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+        onConfirm={handleDelete}
+        modelName={formData?.displayName || formData?.name || 'Unnamed Model'}
+      />
     </>
   );
 }
+

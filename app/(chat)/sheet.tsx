@@ -49,7 +49,7 @@ export function ChatToneSettings({ onSave, initialSettings = {} }: ChatToneSetti
     <Sheet>
       <SheetTrigger asChild>
         <Button size="sm" variant="outline">
-          <Settings2 className="h-4 w-4" />
+          <Settings2 className="size-4" />
           <span className="sr-only">Chat Settings</span>
         </Button>
       </SheetTrigger>

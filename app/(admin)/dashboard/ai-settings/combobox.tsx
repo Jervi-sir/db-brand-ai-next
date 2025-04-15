@@ -50,7 +50,7 @@ export function Combobox({
           {value
             ? options.find((option) => option.value === value)?.label
             : placeholder}
-          <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />
+          <ChevronsUpDown className="ml-2 size-4 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="p-0">

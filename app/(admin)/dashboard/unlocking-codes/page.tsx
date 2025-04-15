@@ -274,7 +274,7 @@ export default function CodeManagement() {
                     <Dialog open={deleteOpen === item.id} onOpenChange={(open) => setDeleteOpen(open ? item.id : null)}>
                       <DialogTrigger asChild>
                         <Button variant="destructive" size="sm">
-                          <Trash2 className="h-4 w-4" />
+                          <Trash2 className="size-4" />
                         </Button>
                       </DialogTrigger>
                       <DialogContent>
