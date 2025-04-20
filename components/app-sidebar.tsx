@@ -1,7 +1,7 @@
 'use client';
 
 import type { User } from 'next-auth';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 
 import { PlusIcon } from '@/components/icons';
 import { SidebarHistory } from '@/components/sidebar-history';
@@ -11,16 +11,25 @@ import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
   SidebarHeader,
   SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
   useSidebar,
 } from '@/components/ui/sidebar';
 import Link from 'next/link';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
+import { CalendarCheck2Icon, CalendarCogIcon, CalendarDaysIcon, CalendarFoldIcon, CalendarIcon, CalendarOffIcon, CalendarX2Icon, KanbanIcon, KanbanSquareIcon } from 'lucide-react';
+import { CalendarDayView } from '@/app/calendar/calendar/components/week-and-day-view/calendar-day-view';
+import React from 'react';
+import { ExtendedUser } from '@/app/(auth)/auth';
 
-export function AppSidebar({ user }: { user: User | undefined }) {
+export function AppSidebar({ user }: { user: ExtendedUser | undefined }) {
   const router = useRouter();
   const { setOpenMobile } = useSidebar();
+  const pathname = usePathname();
 
   return (
     <Sidebar variant='floating' className="group-data-[side=left]:border-r-0 ">
@@ -59,6 +68,37 @@ export function AppSidebar({ user }: { user: User | undefined }) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
+        {user?.role === 'admin' && (
+          <SidebarGroup>
+            <div className="px-2 py-1 text-xs text-sidebar-foreground/50">
+              Tools
+            </div>
+            <SidebarGroupContent>
+              {[
+                { name: 'Kanban', icon: <KanbanSquareIcon />, url: '/kanban' },
+                { name: 'Schedule', icon: <CalendarIcon />, url: '/calendar/agenda-view' },
+              ].map((item, index) => {
+                // Get the base path segment (e.g., "kanban" or "calendar")
+                const pathSegment = item.url.split('/').filter(Boolean)[0];
+
+                // Check if current pathname starts with this path segment
+                const isActive = pathname.startsWith(`/${pathSegment}`);
+
+                return (
+                  <React.Fragment key={index}>
+                    <SidebarMenuButton asChild isActive={isActive}>
+                      <Link href={item.url} onClick={() => setOpenMobile(false)}>
+                        {item.icon}
+                        <span>{item.name}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </React.Fragment>
+                );
+              })}
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
+
         <SidebarHistory user={user} />
       </SidebarContent>
       <SidebarFooter>{user && <SidebarUserNav user={user} />}</SidebarFooter>

@@ -51,7 +51,7 @@ export function ModelSelector({
       }
     };
     fetchModels();
-  }, [selectedModelID, onModelChange]);
+  }, [selectedModelID, onModelChange, setOptimisticModelId]);
 
   const selectedChatModel: any = useMemo(
     () => models.find((chatModel) => chatModel.id === optimisticModelId),
