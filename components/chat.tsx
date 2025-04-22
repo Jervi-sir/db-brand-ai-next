@@ -1,11 +1,9 @@
 'use client';
 
-import type { Attachment } from 'ai';
 import { useChat } from '@ai-sdk/react';
 import { useEffect, useState } from 'react';
 import useSWR, { useSWRConfig } from 'swr';
 import { ChatHeader } from '@/components/chat-header';
-import { message, type Vote } from '@/lib/db/schema';
 import { fetcher, generateUUID, Message } from '@/lib/utils';
 import { Artifact } from './artifact';
 import { MultimodalInput } from './multimodal-input';
@@ -17,7 +15,7 @@ import { useLockStore } from '@/zustand/use-lock-store';
 import { Textarea } from './ui/textarea';
 import { cx } from 'class-variance-authority';
 import { Button } from './ui/button';
-import { ArrowUpIcon, Unlock } from 'lucide-react';
+import { Unlock } from 'lucide-react';
 
 export function Chat({
   id,

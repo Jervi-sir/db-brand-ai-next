@@ -204,3 +204,39 @@
 ::-webkit-scrollbar-thumb {
     @apply rounded-full bg-border border-[1px] border-transparent border-solid bg-clip-padding;
 }
+
+/* Style the toolbar for react-simple-wysiwyg */
+.rs-wysiwyg-toolbar {
+    @apply bg-background border-b border-red-200 p-2 flex gap-1;
+}
+
+.dark .rs-wysiwyg-toolbar {
+    @apply bg-red-800 border-red-700;
+}
+
+/* Style toolbar buttons */
+.rs-wysiwyg-toolbar button {
+    @apply text-red-700 bg-red-100 hover:bg-red-200 rounded p-1.5 transition-colors;
+}
+
+.dark .rs-wysiwyg-toolbar button {
+    @apply text-red-200 bg-red-700 hover:bg-red-600;
+}
+
+/* Active button state */
+.rs-wysiwyg-toolbar button[aria-pressed="true"] {
+    @apply bg-red-300;
+}
+
+.dark .rs-wysiwyg-toolbar button[aria-pressed="true"] {
+    @apply bg-red-500;
+}
+
+/* Editor content area */
+.rs-wysiwyg div[contenteditable] {
+    @apply bg-background text-foreground p-2 min-h-[150px];
+}
+
+.dark .rs-wysiwyg div[contenteditable] {
+    @apply bg-red-900 text-red-100;
+}
