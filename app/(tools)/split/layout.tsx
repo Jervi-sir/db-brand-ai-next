@@ -31,7 +31,7 @@ export default async function Layout({
             <div className="flex items-center gap-2 px-3">
               <SidebarTrigger />
               <Separator orientation="vertical" className="mr-2 h-4" />
-              <h4>Kanban</h4>
+              <h4>Split</h4>
             </div>
           </header>
           {children}

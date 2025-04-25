@@ -33,7 +33,7 @@ export function DateNavigator({ view, events }: IProps) {
   const handleNext = () => setSelectedDate(navigateDate(selectedDate, view, "next"));
 
   return (
-    <div className="space-y-0.5">
+    <div className="flex-1 flex flex-col md:flex-row justify-between space-y-0.5">
       <div className="flex items-center gap-2">
         <span className="text-lg font-semibold">
           {month} {year}
