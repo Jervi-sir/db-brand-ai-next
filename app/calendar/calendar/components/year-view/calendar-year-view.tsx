@@ -3,7 +3,7 @@ import { addMonths, startOfYear } from "date-fns";
 
 import { useCalendar } from "../../contexts/calendar-context";
 
-import { YearViewMonth } from "../../components/year-view/year-view-month";
+import { YearViewMonth } from "./year-view-month";
 
 import type { IEvent } from "../../interfaces";
 

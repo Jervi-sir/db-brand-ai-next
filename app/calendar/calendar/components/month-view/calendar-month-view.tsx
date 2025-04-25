@@ -2,7 +2,7 @@ import { useMemo } from "react";
 
 import { useCalendar } from "../../contexts/calendar-context";
 
-import { DayCell } from "../../components/month-view/day-cell";
+import { DayCell } from "./day-cell";
 
 import { getCalendarCells, calculateMonthEventPositions } from "../../helpers";
 

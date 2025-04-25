@@ -3,10 +3,10 @@ import { Columns, Grid3x3, List, Plus, Grid2x2, CalendarRange } from "lucide-rea
 
 import { Button } from "@/components/ui/button";
 
-import { UserSelect } from "../../components/header/user-select";
-import { TodayButton } from "../../components/header/today-button";
-import { DateNavigator } from "../../components/header/date-navigator";
-import { AddEventDialog } from "../../components/dialogs/add-event-dialog";
+import { UserSelect } from "./user-select";
+import { TodayButton } from "./today-button";
+import { DateNavigator } from "./date-navigator";
+import { AddEventDialog } from "../dialogs/add-event-dialog";
 
 import type { IEvent } from "../../interfaces";
 import type { TCalendarView } from "../../types";

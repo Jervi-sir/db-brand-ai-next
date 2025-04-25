@@ -1,9 +1,9 @@
 import { useMemo } from "react";
 import { isToday, startOfDay } from "date-fns";
 
-import { EventBullet } from "../../components/month-view/event-bullet";
-import { DroppableDayCell } from "../../components/dnd/droppable-day-cell";
-import { MonthEventBadge } from "../../components/month-view/month-event-badge";
+import { EventBullet } from "./event-bullet";
+import { DroppableDayCell } from "../dnd/droppable-day-cell";
+import { MonthEventBadge } from "./month-event-badge";
 
 import { cn } from "@/lib/utils";
 import { getMonthCellEvents } from "../../helpers";

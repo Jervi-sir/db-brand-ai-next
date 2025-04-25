@@ -4,7 +4,7 @@ import { format, isSameDay, parseISO, getDaysInMonth, startOfMonth } from "date-
 
 import { useCalendar } from "../../contexts/calendar-context";
 
-import { YearViewDayCell } from "../../components/year-view/year-view-day-cell";
+import { YearViewDayCell } from "./year-view-day-cell";
 
 import type { IEvent } from "../../interfaces";
 

@@ -23,8 +23,9 @@ import {
 import DOMPurify from 'dompurify';
 import { useForm } from 'react-hook-form';
 import { cn } from '@/lib/utils';
-import { MinimalTiptapEditor } from './minimal-tiptap';
+import { MinimalTiptapEditor } from '../../../zdeprecated/split/minimal-tiptap';
 import { Moon, Sun } from 'lucide-react';
+import { toast } from '@/components/toast';
 
 export default function Page() {
   // Form setup with react-hook-form
@@ -38,7 +39,7 @@ export default function Page() {
 
   // State for scripts and token usage
   const [scripts, setScripts] = useState([]);
-  const [usage, setUsage] = useState({ promptTokens: '', completionTokens: '', totalTokens: '' }); // Initialize as null
+  const [usage, setUsage] = useState({ promptTokens: '', completionTokens: '', totalTokens: '' });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -50,7 +51,7 @@ export default function Page() {
     setUsage({ promptTokens: '', completionTokens: '', totalTokens: '' }); // Clear previous usage
 
     try {
-      const response = await fetch('/split/api/generate-scripts', {
+      const response = await fetch('/api/generate-scripts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
@@ -68,6 +69,36 @@ export default function Page() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleValidate = async (script: any, index: number) => {
+    try {
+      const response = await fetch('/api/content/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          topic: form.getValues('topic'),
+          description: form.getValues('description'),
+          mood: form.getValues('mood'),
+          content: script,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to save script');
+      }
+
+      toast({ type: 'success', description: 'Script Validated!' });
+
+      setScripts((prev) => prev.filter((_, i) => i !== index));
+    } catch (error) {
+      toast({ type: 'error', description: 'Failed to validate script!' });
+    }
+  };
+
+
+  const handleDelete = (index: number) => {
+    setScripts((prev) => prev.filter((_, i) => i !== index));
   };
 
   return (
@@ -162,9 +193,7 @@ export default function Page() {
           <h2 className="text-2xl font-bold mb-4">Generated Scripts</h2>
           <div className="space-y-4">
             {isLoading ? (
-              <p className="text-gray-500 dark:text-gray-400">
-                Generating scripts...
-              </p>
+              <p className="text-gray-500 dark:text-gray-400">Generating scripts...</p>
             ) : scripts.length === 0 ? (
               <p className="text-gray-500 dark:text-gray-400">
                 No scripts generated yet. Fill out the form and click &quot;Generate Scripts&quot;.
@@ -190,6 +219,20 @@ export default function Page() {
                     editable={true}
                     editorClassName="focus:outline-none px-5 py-4 h-full"
                   />
+                  <div className="mt-2 flex gap-2">
+                    <Button
+                      variant="outline"
+                      onClick={() => handleValidate(script, index)}
+                    >
+                      Validate
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      onClick={() => handleDelete(index)}
+                    >
+                      Delete
+                    </Button>
+                  </div>
                 </div>
               ))
             )}

@@ -6,7 +6,7 @@ import { Calendar, Clock, Text, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
-import type { IEvent } from "../../../calendar/interfaces";
+import type { IEvent } from "../../interfaces";
 import { EditEventDialog } from "./edit-event-dialog";
 
 interface IProps {

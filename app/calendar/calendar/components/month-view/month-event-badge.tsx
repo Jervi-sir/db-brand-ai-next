@@ -3,8 +3,8 @@ import { endOfDay, format, isSameDay, parseISO, startOfDay } from "date-fns";
 
 import { useCalendar } from "../../contexts/calendar-context";
 
-import { DraggableEvent } from "../../components/dnd/draggable-event";
-import { EventDetailsDialog } from "../../components/dialogs/event-details-dialog";
+import { DraggableEvent } from "../dnd/draggable-event";
+import { EventDetailsDialog } from "../dialogs/event-details-dialog";
 
 import { cn } from "@/lib/utils";
 

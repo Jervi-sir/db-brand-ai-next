@@ -141,6 +141,20 @@
       "when": 1744752353729,
       "tag": "0019_bizarre_lilith",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1745532934588,
+      "tag": "0020_strong_hobgoblin",
+      "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1745536302876,
+      "tag": "0021_sparkling_phalanx",
+      "breakpoints": true
     }
   ]
 }

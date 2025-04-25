@@ -1,15 +1,15 @@
 {
   "wajed_app_": {
-    "msDuration": 6835940,
-    "duration": "1h 53m"
+    "msDuration": 7599508,
+    "duration": "2h 6m"
   },
   "dr-ai": {
     "msDuration": 44072304,
     "duration": "12h 14m"
   },
   "wajed_app_web": {
-    "msDuration": 38961,
-    "duration": "0m"
+    "msDuration": 3264180,
+    "duration": "54m"
   },
   "sim-charge-guardian": {
     "msDuration": 123975,
@@ -32,19 +32,19 @@
     "duration": "3h 32m"
   },
   "dr-brand-ai": {
-    "msDuration": 47299467,
-    "duration": "13h 8m"
+    "msDuration": 94076990,
+    "duration": "26h 7m"
   },
   "ai-chatbot": {
     "msDuration": 1670055,
     "duration": "27m"
   },
   "op_app": {
-    "msDuration": 941590,
-    "duration": "15m"
+    "msDuration": 2375103,
+    "duration": "39m"
   },
   "op_coming_soon": {
-    "msDuration": 541665,
+    "msDuration": 574036,
     "duration": "9m"
   },
   "op_coming_soon_1": {
@@ -139,6 +139,54 @@
     "msDuration": 1845576,
     "duration": "30m"
   },
+  "op_app_2.8": {
+    "msDuration": 157615519,
+    "duration": "43h 46m"
+  },
+  "ai prompts": {
+    "msDuration": 275304,
+    "duration": "4m"
+  },
+  "op_app_2.8_router": {
+    "msDuration": 4292418,
+    "duration": "1h 11m"
+  },
+  "docsexpo": {
+    "msDuration": 279469,
+    "duration": "4m"
+  },
+  "octa_api_": {
+    "msDuration": 30051911,
+    "duration": "8h 20m"
+  },
+  "big-calendar-offf-full": {
+    "msDuration": 124859,
+    "duration": "2m"
+  },
+  "react-dnd-kit-tailwind-shadcn-ui": {
+    "msDuration": 94815,
+    "duration": "1m"
+  },
+  "server": {
+    "msDuration": 71235,
+    "duration": "1m"
+  },
+  "iptv-sales-page": {
+    "msDuration": 5853248,
+    "duration": "1h 37m"
+  },
+  "streaming_saas": {
+    "msDuration": 2629332,
+    "duration": "43m"
+  },
+  "db-brand-ai-next": {
+    "msDuration": 43623436,
+    "duration": "12h 7m"
+  },
+  "shadcn-minimal-tiptap": {
+    "msDuration": 732246,
+    "duration": "12m"
+  },
   "startDate": "2025-04-07T14:12:25.585Z",
-  "endDate": "2025-04-14T11:43:34.599Z"
+  "endDate": "2025-04-22T13:53:07.079Z"
 }

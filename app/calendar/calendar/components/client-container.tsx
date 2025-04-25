@@ -5,14 +5,14 @@ import { isSameDay, parseISO } from "date-fns";
 
 import { useCalendar } from "../contexts/calendar-context";
 
-import { DndProviderWrapper } from "../components/dnd/dnd-provider";
+import { DndProviderWrapper } from "./dnd/dnd-provider";
 
-import { CalendarHeader } from "../components/header/calendar-header";
-import { CalendarYearView } from "../components/year-view/calendar-year-view";
-import { CalendarMonthView } from "../components/month-view/calendar-month-view";
-import { CalendarAgendaView } from "../components/agenda-view/calendar-agenda-view";
-import { CalendarDayView } from "../components/week-and-day-view/calendar-day-view";
-import { CalendarWeekView } from "../components/week-and-day-view/calendar-week-view";
+import { CalendarHeader } from "./header/calendar-header";
+import { CalendarYearView } from "./year-view/calendar-year-view";
+import { CalendarMonthView } from "./month-view/calendar-month-view";
+import { CalendarAgendaView } from "./agenda-view/calendar-agenda-view";
+import { CalendarDayView } from "./week-and-day-view/calendar-day-view";
+import { CalendarWeekView } from "./week-and-day-view/calendar-week-view";
 
 import type { TCalendarView } from "../types";
 

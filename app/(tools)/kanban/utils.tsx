@@ -21,3 +21,10 @@ export function hasDraggableData<T extends Active | Over>(
 
   return false;
 }
+
+// Utility function to strip HTML tags
+export const stripHtml = (html: string): string => {
+  const tmp = document.createElement('div');
+  tmp.innerHTML = html;
+  return tmp.textContent || tmp.innerText || '';
+};

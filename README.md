@@ -63,3 +63,40 @@ This template ships with OpenAI `gpt-4o` as the default. However, with the [AI S
 https://github.com/JefMari/awesome-wysiwyg-editors
 https://shadcn-minimal-tiptap.vercel.app/
 https://echo-editor.jzcloud.site/
+
+
+### project time
+"dr-ai": {
+  "msDuration": 44072304,
+  "duration": "12h 14m"
+},
+  "dr-brand-ai-laravel": {
+  "msDuration": 2976131,
+  "duration": "49m"
+},
+"dr-ai-next": {
+  "msDuration": 2397876,
+  "duration": "39m"
+},
+"dr-brand-ai": {
+  "msDuration": 47299467,
+  "duration": "13h 8m"
+},
+"ai-chatbot": {
+  "msDuration": 1670055,
+  "duration": "27m"
+},
+``` 2025, April 22nd
+ "dr-brand-ai": {
+    "msDuration": 94076990,
+    "duration": "26h 7m"
+  },
+    "db-brand-ai-next": {
+    "msDuration": 43623436,
+    "duration": "12h 7m"
+  },
+
+=====================================
+Total = 12h 14m + 49m + 39m + 13h 8m + 27m + 26h 7m + 12h 7m
+      = 63h
+=====================================

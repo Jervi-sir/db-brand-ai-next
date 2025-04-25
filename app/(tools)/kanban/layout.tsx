@@ -3,7 +3,7 @@ import { cookies } from 'next/headers';
 import { AppSidebar } from '@/components/app-sidebar';
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 
-import { auth } from '../(auth)/auth';
+import { auth } from '../../(auth)/auth';
 import Script from 'next/script';
 import { SessionProvider } from 'next-auth/react';
 import { Separator } from '@/components/ui/separator';

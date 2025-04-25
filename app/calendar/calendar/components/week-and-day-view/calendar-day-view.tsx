@@ -6,11 +6,11 @@ import { useCalendar } from "../../contexts/calendar-context";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { SingleCalendar } from "@/components/ui/single-calendar";
 
-import { AddEventDialog } from "../../components/dialogs/add-event-dialog";
-import { EventBlock } from "../../components/week-and-day-view/event-block";
-import { DroppableTimeBlock } from "../../components/dnd/droppable-time-block";
-import { CalendarTimeline } from "../../components/week-and-day-view/calendar-time-line";
-import { DayViewMultiDayEventsRow } from "../../components/week-and-day-view/day-view-multi-day-events-row";
+import { AddEventDialog } from "../dialogs/add-event-dialog";
+import { EventBlock } from "./event-block";
+import { DroppableTimeBlock } from "../dnd/droppable-time-block";
+import { CalendarTimeline } from "./calendar-time-line";
+import { DayViewMultiDayEventsRow } from "./day-view-multi-day-events-row";
 
 import { cn } from "@/lib/utils";
 import { groupEvents, getEventBlockStyle, isWorkingHour, getCurrentEvents, getVisibleHours } from "../../helpers";

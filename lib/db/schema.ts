@@ -1,5 +1,5 @@
 import { relations, type InferSelectModel } from 'drizzle-orm';
-import { pgTable, varchar, timestamp, json, uuid, text, primaryKey, foreignKey, boolean, integer, real, decimal, } from 'drizzle-orm/pg-core';
+import { pgTable, varchar, timestamp, json, uuid, text, primaryKey, foreignKey, boolean, integer, real, decimal, index, } from 'drizzle-orm/pg-core';
 
 export const user = pgTable('User', {
   id: uuid('id').primaryKey().notNull().defaultRandom(),
@@ -249,3 +249,26 @@ export const promptHistory = pgTable('PromptHistory', {
 });
 export type PromptHistory = InferSelectModel<typeof promptHistory>;
 
+/*
+|--------------------------------------------------------------------------
+| Scripts
+|--------------------------------------------------------------------------
+*/
+// Single content table for scripts, voice-overs, creation, and done stages
+export const content = pgTable('Content', {
+  id: uuid('id').primaryKey().notNull().defaultRandom(),
+  userId: uuid('user_id').references(() => user.id).notNull(),
+  topic: varchar('topic', { length: 255 }).notNull(),
+  description: text('description').notNull(),
+  mood: varchar('mood', { length: 50 }).notNull(),
+  content: text('content').notNull(),
+  stage: varchar('stage', { length: 50 }).notNull().default('script'), // script, voice_over, creation, done
+  scheduledDate: timestamp('scheduledDate'),
+  deadline: timestamp('deadline'),
+  createdAt: timestamp('createdAt').notNull().defaultNow(),
+  updatedAt: timestamp('updatedAt').notNull().defaultNow(),
+},
+(table) => ({
+  calendarIdx: index('idx_content_stage_scheduledDate').on(table.stage, table.scheduledDate),
+})
+);
