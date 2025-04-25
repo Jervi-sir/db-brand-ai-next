@@ -40,13 +40,13 @@ export function DateNavigator({ view, events }: IProps) {
       </div>
 
       <div className="flex items-center gap-2">
-        <Button variant="outline" className="size-6.5 px-0 [&_svg]:size-4.5" onClick={handlePrevious}>
+        <Button variant="outline" className="size-6 px-0 [&_svg]:size-4" onClick={handlePrevious}>
           <ChevronLeft />
         </Button>
 
         <p className="text-sm text-muted-foreground">{rangeText(view, selectedDate)}</p>
 
-        <Button variant="outline" className="size-6.5 px-0 [&_svg]:size-4.5" onClick={handleNext}>
+        <Button variant="outline" className="size-6 px-0 [&_svg]:size-4" onClick={handleNext}>
           <ChevronRight />
         </Button>
       </div>

@@ -4,7 +4,7 @@ import { parseISO } from "date-fns";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import { useDisclosure } from "../../../hooks/use-disclosure";
+import { useDisclosure } from "../../hooks/use-disclosure";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
