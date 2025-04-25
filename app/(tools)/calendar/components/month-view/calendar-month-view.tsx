@@ -2,16 +2,18 @@ import { useMemo } from "react";
 import { useCalendar } from "../../contexts/calendar-context";
 import { DayCell } from "./day-cell";
 import { getCalendarCells, calculateMonthEventPositions } from "../../helpers";
+import { IEvent } from "../../types";
 
-interface IEvent {
-  id: string | number;
-  startDate: string;
-  endDate: string;
-  title: string;
-  color: string;
-  description?: string;
-  user?: { id: string; name: string };
-}
+// interface IEvent {
+//   id: string | number;
+//   startDate: string;
+//   endDate: string;
+//   title: string;
+//   color: string;
+//   description?: string;
+//   user?: { id: string; name: string };
+
+// }
 
 interface IProps {
   singleDayEvents: IEvent[];

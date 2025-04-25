@@ -64,6 +64,8 @@ https://github.com/JefMari/awesome-wysiwyg-editors
 https://shadcn-minimal-tiptap.vercel.app/
 https://echo-editor.jzcloud.site/
 
+### Calendar
+https://github.com/Jervi-sir/big-calendar-offf-full
 
 ### project time
 "dr-ai": {

@@ -28,7 +28,7 @@ export default async function Layout({ children }: { children: React.ReactNode }
                 <h4>Schedule</h4>
               </div>
             </header>
-            <div className="flex flex-col gap-4 px-8 py-4">
+            <div className="flex flex-col gap-4 px-2 py-4">
               {children}
             </div>
           </>

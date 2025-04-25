@@ -11,16 +11,17 @@ import {
   addMonths,
   subMonths,
 } from "date-fns";
+import { IEvent } from "./types";
 
-interface IEvent {
-  id: string | number;
-  startDate: string;
-  endDate: string;
-  title: string;
-  color: string;
-  description?: string;
-  user?: { id: string; name: string };
-}
+// interface IEvent {
+//   id: string | number;
+//   startDate: string;
+//   endDate: string;
+//   title: string;
+//   color: string;
+//   description?: string;
+//   user?: { id: string; name: string };
+// }
 
 interface ICalendarCell {
   day: number;

@@ -3,16 +3,17 @@ import { formatDate } from "date-fns";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useCalendar } from "../../contexts/calendar-context";
 import { getEventsCount, navigateDate, rangeText } from "../../helpers";
+import { IEvent } from "../../types";
 
-interface IEvent {
-  id: string | number;
-  startDate: string;
-  endDate: string;
-  title: string;
-  color: string;
-  description?: string;
-  user?: { id: string; name: string };
-}
+// interface IEvent {
+//   id: string | number;
+//   startDate: string;
+//   endDate: string;
+//   title: string;
+//   color: string;
+//   description?: string;
+//   user?: { id: string; name: string };
+// }
 
 interface IProps {
   view: "month";
