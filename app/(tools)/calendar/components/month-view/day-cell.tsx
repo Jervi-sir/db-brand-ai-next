@@ -1,3 +1,5 @@
+'use client'
+
 import { useMemo, useState, useEffect } from "react";
 import { isToday, startOfDay, format, parseISO } from "date-fns";
 import { EventBullet } from "./event-bullet";
@@ -76,7 +78,7 @@ export function DayCell({ cell, events, eventPositions }: IProps) {
   // Common cell content
   const cellContent = (
     <div
-      className={`flex h-full flex-col gap-1 border-l border-t py-1.5 lg:py-2 ${
+      className={`flex h-full flex-col gap-1 border-l border-t py-1.5 md:py-2 ${
         isSunday ? "border-l-0" : ""
       } ${cellEvents.length > 0 && isMobile ? "cursor-pointer" : ""}`}
       onClick={() => {
@@ -89,7 +91,7 @@ export function DayCell({ cell, events, eventPositions }: IProps) {
       tabIndex={cellEvents.length > 0 && isMobile ? 0 : -1}
     >
       <span
-        className={`h-6 px-1 text-xs font-semibold lg:px-2 ${
+        className={`h-6 px-1 text-xs font-semibold md:px-2 ${
           !currentMonth ? "opacity-20" : ""
         } ${
           isToday(date)
@@ -100,7 +102,7 @@ export function DayCell({ cell, events, eventPositions }: IProps) {
         {day}
       </span>
       <div
-        className={`flex h-6 gap-1 px-2 lg:h-[94px] lg:flex-col lg:gap-2 lg:px-0 ${
+        className={`flex h-6 gap-1 px-2 md:h-[94px] md:flex-col md:gap-1 md:px-0 ${
           !currentMonth ? "opacity-50" : ""
         }`}
       >
@@ -110,12 +112,12 @@ export function DayCell({ cell, events, eventPositions }: IProps) {
             ? `event-${event.id}-${position}`
             : `empty-${position}`;
           return (
-            <div key={eventKey} className="lg:flex-1">
+            <div key={eventKey} className="md:flex-1">
               {event && (
                 <>
-                  <EventBullet className="lg:hidden" color={event.color} />
+                  <EventBullet className="md:hidden" color={event.color} />
                   <MonthEventBadge
-                    className="hidden lg:flex"
+                    className="hidden md:flex"
                     event={event}
                     cellDate={startOfDay(date)}
                   />
