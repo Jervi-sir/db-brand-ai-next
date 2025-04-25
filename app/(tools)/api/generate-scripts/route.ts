@@ -13,17 +13,17 @@ export async function POST(request: Request) {
     }
 
     // Parse the request body
-    const { topic, description, mood } = await request.json();
+    const { title, userPrompt, mood } = await request.json();
 
-    if (!topic || !mood) {
-      return new Response('Topic and mood are required', { status: 400 });
+    if (!title || !mood) {
+      return new Response('Title and mood are required', { status: 400 });
     }
 
     // Construct the prompt for script generation
     const prompt = `
       Generate three unique scripts based on the following inputs:
-      - Topic: ${topic}
-      - Description: ${description || 'No additional context provided'}
+      - Title: ${title}
+      - User Prompt: ${userPrompt || 'No additional context provided'}
       - Mood: ${mood}
 
       Each script should be a short paragraph (50-100 words) formatted in HTML with appropriate tags (e.g., <p>, <b>, <i>) for emphasis. Return the scripts as a JSON array of HTML strings, like this:
@@ -37,7 +37,7 @@ export async function POST(request: Request) {
 
     // Call OpenAI API to generate scripts
     const { text, usage } = await generateText({
-      model: openai('gpt-4.1-nano-2025-04-14'), // Use a valid model
+      model: openai('gpt-4.1-nano-2025-04-14'),
       prompt,
       temperature: 0.7,
       maxTokens: 500,

@@ -1,10 +1,9 @@
+// File: /api/content/kanban/route.ts
 import { NextResponse } from 'next/server';
-import { drizzle } from 'drizzle-orm/node-postgres';
 import { and, eq, inArray } from 'drizzle-orm';
 import { auth } from '@/app/(auth)/auth';
 import { db } from '@/lib/db/queries';
 import { content } from '@/lib/db/schema';
-
 
 export async function GET(request: Request) {
   const session = await auth();
@@ -16,14 +15,14 @@ export async function GET(request: Request) {
     const userContent = await db
       .select({
         id: content.id,
-        topic: content.topic,
+        title: content.title, // Changed from topic
         mood: content.mood,
         columnId: content.stage,
-        content: content.generatedScript,
+        generatedScript: content.generatedScript, // Changed from content
         scheduledDate: content.scheduledDate,
         deadline: content.deadline,
         stage: content.stage,
-        description: content.userPrompt,
+        userPrompt: content.userPrompt, // Changed from description
         createdAt: content.createdAt,
       })
       .from(content)

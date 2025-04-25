@@ -1,3 +1,4 @@
+// File: /api/content/route.ts
 import { NextResponse } from 'next/server';
 import { and, eq } from 'drizzle-orm';
 import { sql } from 'drizzle-orm';
@@ -18,7 +19,17 @@ export async function GET(request: Request) {
 
   try {
     const userContent = await db
-      .select()
+      .select({
+        id: content.id,
+        title: content.title, // Changed from topic
+        mood: content.mood,
+        generatedScript: content.generatedScript, // Changed from content
+        userPrompt: content.userPrompt, // Changed from description
+        stage: content.stage,
+        scheduledDate: content.scheduledDate,
+        deadline: content.deadline,
+        createdAt: content.createdAt,
+      })
       .from(content)
       .where(
         and(

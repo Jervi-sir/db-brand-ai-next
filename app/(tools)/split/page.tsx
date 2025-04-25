@@ -1,4 +1,3 @@
-// src/app/page.jsx
 'use client';
 
 import { useState } from 'react';
@@ -24,21 +23,21 @@ import DOMPurify from 'dompurify';
 import { useForm } from 'react-hook-form';
 import { cn } from '@/lib/utils';
 import { MinimalTiptapEditor } from '../components/minimal-tiptap';
-import { Moon, Sun } from 'lucide-react';
 import { toast } from '@/components/toast';
 
 export default function Page() {
   // Form setup with react-hook-form
   const form = useForm({
     defaultValues: {
-      topic: '',
-      description: '',
+      title: '',
+      userPrompt: '',
       mood: '',
     },
   });
 
-  // State for scripts and token usage
+  // State for scripts, validation status, and token usage
   const [scripts, setScripts] = useState([]);
+  const [validated, setValidated] = useState([]); // New state to track validation
   const [usage, setUsage] = useState({ promptTokens: '', completionTokens: '', totalTokens: '' });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -48,7 +47,8 @@ export default function Page() {
     setIsLoading(true);
     setError(null);
     setScripts([]);
-    setUsage({ promptTokens: '', completionTokens: '', totalTokens: '' }); // Clear previous usage
+    setValidated([]); // Reset validation state
+    setUsage({ promptTokens: '', completionTokens: '', totalTokens: '' });
 
     try {
       const response = await fetch('/api/generate-scripts', {
@@ -63,7 +63,7 @@ export default function Page() {
 
       const { scripts, usage } = await response.json();
       setScripts(scripts.map((script: any) => DOMPurify.sanitize(script)));
-      setUsage(usage); // Set usage data
+      setValidated(new Array(scripts.length).fill(false)); // Initialize validation state
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -77,10 +77,13 @@ export default function Page() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          topic: form.getValues('topic'),
-          description: form.getValues('description'),
+          title: form.getValues('title'),
+          userPrompt: form.getValues('userPrompt'),
           mood: form.getValues('mood'),
-          content: script,
+          generatedScript: script,
+          stage: 'script', // Default stage for new content
+          scheduledDate: new Date().toISOString(), // Default to current date
+          deadline: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // Default to 7 days from now
         }),
       });
 
@@ -89,16 +92,19 @@ export default function Page() {
       }
 
       toast({ type: 'success', description: 'Script Validated!' });
-
-      setScripts((prev) => prev.filter((_, i) => i !== index));
+      setValidated((prev) => {
+        const newValidated = [...prev];
+        newValidated[index] = true; // Mark script as validated
+        return newValidated;
+      });
     } catch (error) {
       toast({ type: 'error', description: 'Failed to validate script!' });
     }
   };
 
-
   const handleDelete = (index: number) => {
     setScripts((prev) => prev.filter((_, i) => i !== index));
+    setValidated((prev) => prev.filter((_, i) => i !== index)); // Update validation state
   };
 
   return (
@@ -109,13 +115,13 @@ export default function Page() {
           <h2 className="text-2xl font-bold mb-4">Script Generator</h2>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              {/* Topic */}
+              {/* Title */}
               <FormField
                 control={form.control}
-                name="topic"
+                name="title"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Topic</FormLabel>
+                    <FormLabel>Title</FormLabel>
                     <FormControl>
                       <Input placeholder="e.g., Adventure Story" {...field} />
                     </FormControl>
@@ -123,13 +129,13 @@ export default function Page() {
                   </FormItem>
                 )}
               />
-              {/* Description */}
+              {/* User Prompt */}
               <FormField
                 control={form.control}
-                name="description"
+                name="userPrompt"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Description</FormLabel>
+                    <FormLabel>User Prompt</FormLabel>
                     <FormControl>
                       <Textarea
                         placeholder="Describe the script context..."
@@ -158,10 +164,10 @@ export default function Page() {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="Happy">Happy</SelectItem>
-                        <SelectItem value="Serious">Serious</SelectItem>
-                        <SelectItem value="Funny">Funny</SelectItem>
-                        <SelectItem value="Dramatic">Dramatic</SelectItem>
+                        <SelectItem value="blue">Happy</SelectItem>
+                        <SelectItem value="gray">Serious</SelectItem>
+                        <SelectItem value="yellow">Funny</SelectItem>
+                        <SelectItem value="red">Dramatic</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -196,7 +202,7 @@ export default function Page() {
               <p className="text-gray-500 dark:text-gray-400">Generating scripts...</p>
             ) : scripts.length === 0 ? (
               <p className="text-gray-500 dark:text-gray-400">
-                No scripts generated yet. Fill out the form and click &quot;Generate Scripts&quot;.
+                No scripts generated yet. Fill out the form and click "Generate Scripts".
               </p>
             ) : (
               scripts.map((script, index) => (
@@ -208,7 +214,7 @@ export default function Page() {
                     value={script}
                     onChange={(value) =>
                       setScripts((prev: any) =>
-                        prev.map((s: any, i: number) => (i === index ? value : s))
+                        prev.map((s: any, i: any) => (i === index ? value : s))
                       )
                     }
                     throttleDelay={2000}
@@ -223,8 +229,9 @@ export default function Page() {
                     <Button
                       variant="outline"
                       onClick={() => handleValidate(script, index)}
+                      disabled={validated[index]} // Disable if validated
                     >
-                      Validate
+                      {validated[index] ? 'Validated' : 'Validate'} {/* Change text based on state */}
                     </Button>
                     <Button
                       variant="destructive"

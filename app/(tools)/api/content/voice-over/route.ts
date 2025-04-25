@@ -1,5 +1,5 @@
+// File: /api/content/voice-over/route.ts
 import { NextResponse } from 'next/server';
-import { drizzle } from 'drizzle-orm/node-postgres';
 import { and, eq } from 'drizzle-orm';
 import { auth } from '@/app/(auth)/auth';
 import { content } from '@/lib/db/schema';
@@ -48,7 +48,17 @@ export async function POST(request: Request) {
             updatedAt: new Date(),
           })
           .where(eq(content.id, contentId))
-          .returning();
+          .returning({
+            id: content.id,
+            title: content.title, // Changed from topic
+            mood: content.mood,
+            generatedScript: content.generatedScript, // Changed from content
+            userPrompt: content.userPrompt, // Changed from description
+            stage: content.stage,
+            scheduledDate: content.scheduledDate,
+            deadline: content.deadline,
+            createdAt: content.createdAt,
+          });
       })
     );
 
