@@ -8,7 +8,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { cn } from "@/lib/utils";
 
 import type { ButtonHTMLAttributes } from "react";
-import { useDisclosure } from "@/app/calendar/hooks/use-disclosure";
+import { useDisclosure } from "@/app/calendar2/hooks/use-disclosure";
 
 // ================================== //
 

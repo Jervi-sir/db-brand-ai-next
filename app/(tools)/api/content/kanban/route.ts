@@ -19,11 +19,11 @@ export async function GET(request: Request) {
         topic: content.topic,
         mood: content.mood,
         columnId: content.stage,
-        content: content.content,
+        content: content.generatedScript,
         scheduledDate: content.scheduledDate,
         deadline: content.deadline,
         stage: content.stage,
-        description: content.description,
+        description: content.userPrompt,
         createdAt: content.createdAt,
       })
       .from(content)

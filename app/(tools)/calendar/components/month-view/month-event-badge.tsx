@@ -72,7 +72,7 @@ export function MonthEventBadge({
   const renderBadgeText = ["first", "none"].includes(position);
 
   return (
-    <DraggableEvent event={event}>
+    <DraggableEvent event={event as IEvent}>
       <EventDetailsDialog event={event as any}>
         <div
           role="button"

@@ -1,11 +1,21 @@
+// File: components/dialogs/event-details-dialog.tsx
 "use client";
 
 import { format, parseISO } from "date-fns";
-import { Calendar, Clock, Text, User, CheckCircle } from "lucide-react";
+import { Calendar, Clock, Text, CheckCircle } from "lucide-react";
 import { EditEventDialog } from "./edit-event-dialog";
-import { useState } from "react";
+import * as React from "react";
 import { useCalendar } from "../../contexts/calendar-context";
 import { IEvent } from "../../types";
+import {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 interface IProps {
   event: IEvent;
@@ -14,7 +24,7 @@ interface IProps {
 
 export function EventDetailsDialog({ event, children }: IProps) {
   const { deleteEvent } = useCalendar();
-  const [isOpen, setIsOpen] = useState(false);
+  const [open, setOpen] = React.useState(false);
   const startDate = parseISO(event.startDate);
   const endDate = parseISO(event.endDate);
 
@@ -22,7 +32,7 @@ export function EventDetailsDialog({ event, children }: IProps) {
     if (confirm("Are you sure you want to delete this event?")) {
       try {
         await deleteEvent(event.id);
-        setIsOpen(false);
+        setOpen(false);
       } catch (error) {
         console.error(error);
         alert("Failed to delete event");
@@ -31,27 +41,20 @@ export function EventDetailsDialog({ event, children }: IProps) {
   };
 
   return (
-    <>
-      <div onClick={() => setIsOpen(true)}>{children}</div>
-      <div className={`fixed inset-0 ${isOpen ? "block" : "hidden"} bg-black/50 z-50`}>
-        <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-6 rounded-lg max-w-md w-full">
-          <h2 className="text-lg font-semibold">{event.title}</h2>
-          <div className="space-y-4 mt-4">
-            {event.user && (
-              <div className="flex items-start gap-2">
-                <User className="mt-1 size-4" />
-                <div>
-                  <p className="text-sm font-medium">Responsible</p>
-                  <p className="text-sm text-gray-500">{event.user.name}</p>
-                </div>
-              </div>
-            )}
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>{children}</DialogTrigger>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>{event.title}</DialogTitle>
+        </DialogHeader>
+        <div className="grid gap-4 py-4">
+          <div className="grid grid-cols-2 gap-4 py-4">
             <div className="flex items-start gap-2">
               <Calendar className="mt-1 size-4" />
               <div>
                 <p className="text-sm font-medium">Scheduled Date</p>
-                <p className="text-sm text-gray-500">
-                  {format(startDate, "MMM d, yyyy h:mm a")}
+                <p className="text-sm text-muted-foreground">
+                  {format(startDate, "MMM d, yyyy")}
                 </p>
               </div>
             </div>
@@ -59,49 +62,61 @@ export function EventDetailsDialog({ event, children }: IProps) {
               <Clock className="mt-1 size-4" />
               <div>
                 <p className="text-sm font-medium">Deadline</p>
-                <p className="text-sm text-gray-500">
-                  {format(endDate, "MMM d, yyyy h:mm a")}
+                <p className="text-sm text-muted-foreground">
+                  {format(endDate, "MMM d, yyyy")}
                 </p>
               </div>
             </div>
-            <div className="flex items-start gap-2">
-              <CheckCircle className="mt-1 size-4" />
-              <div>
-                <p className="text-sm font-medium">Stage</p>
-                <p className="text-sm text-gray-500">
-                  {
-                  event?.stage?.charAt(0).toUpperCase() +
-                  event?.stage?.slice(1).replace("_", " ")
-                  || undefined
-                }
-                </p>
-              </div>
-            </div>
-            {event.description && (
-              <div className="flex items-start gap-2">
-                <Text className="mt-1 size-4" />
-                <div>
-                  <p className="text-sm font-medium">Description</p>
-                  <p className="text-sm text-gray-500">{event.description}</p>
-                </div>
-              </div>
-            )}
           </div>
-          <div className="flex justify-end gap-2 mt-4">
-            <button
-              onClick={handleDelete}
-              className="border border-red-300 rounded px-4 py-2 text-sm text-red-700 hover:bg-red-100"
-            >
+          {event.stage && (
+            <div className="flex items-center gap-2">
+              <CheckCircle className="mt-1 size-4" />
+              <div className="flex gap-2">
+                <p className="text-sm font-medium">Stage</p>
+                <p className="text-sm text-muted-foreground">
+                  {event.stage.charAt(0).toUpperCase() +
+                    event.stage.slice(1).replace("_", " ") || "N/A"}
+                </p>
+              </div>
+            </div>
+          )}
+          {event.title && (
+            <div className="flex items-start gap-2">
+              <Text className="mt-1 size-4" />
+              <div>
+                <p className="text-sm font-medium">Title</p>
+                <p className="text-sm text-muted-foreground">
+                  {event.title}
+                </p>
+              </div>
+            </div>
+          )}
+          {event.userPrompt && (
+            <div className="flex items-start gap-2">
+              <Text className="mt-1 size-4" />
+              <div>
+                <p className="text-sm font-medium">Description</p> {/* Changed from User Prompt */}
+                <p className="text-sm text-muted-foreground">
+                  {event.userPrompt}
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+        <DialogFooter>
+          <div className="mr-auto space-x-4">
+            <Button variant="destructive" onClick={handleDelete}>
               Delete
-            </button>
+            </Button>
             <EditEventDialog event={event}>
-              <button className="border rounded px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                Edit
-              </button>
+              <Button variant="outline">Edit</Button>
             </EditEventDialog>
           </div>
-        </div>
-      </div>
-    </>
+          <Button variant="secondary" onClick={() => setOpen(false)}>
+            Cancel
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

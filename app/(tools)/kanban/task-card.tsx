@@ -120,7 +120,7 @@ export function TaskCard({ task, isOverlay, moveTaskToNextColumn }: TaskCardProp
         </Badge>
       </CardHeader>
       <CardContent className="px-3 pt-3 pb-6 text-left whitespace-pre-wrap flex flex-col gap-2">
-        <div>{stripHtml(task.content)}</div>
+        <div>{stripHtml(task.generatedScript)}</div>
         {task.scheduledDate && (
           <div className="text-xs text-muted-foreground">
             Scheduled: {new Date(task.scheduledDate).toLocaleDateString()}

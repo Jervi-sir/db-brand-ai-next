@@ -18,7 +18,12 @@ interface IProps {
 }
 
 export function DroppableDayCell({ cell, children }: IProps) {
-  const { updateEvent } = useCalendar();
+  const { updateEvent, enableDnd } = useCalendar();
+
+  if (!enableDnd) {
+    return <div>{children}</div>;
+  }
+
   const [{ isOver, canDrop }, drop] = useDrop(
     () => ({
       accept: ItemTypes.EVENT,

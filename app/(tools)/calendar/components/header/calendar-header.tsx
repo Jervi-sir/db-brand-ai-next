@@ -1,5 +1,3 @@
-import { Plus } from "lucide-react";
-import { AddEventDialog } from "../dialogs/add-event-dialog";
 import { DateNavigator } from "./date-navigator";
 import { TodayButton } from "./today-button";
 import { IEvent } from "../../types";
@@ -16,12 +14,6 @@ export function CalendarHeader({ view, events }: IProps) {
         <TodayButton />
         <DateNavigator view={view} events={events} />
       </div>
-      <AddEventDialog>
-        <button className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-md">
-          <Plus />
-          Add Event
-        </button>
-      </AddEventDialog>
     </div>
   );
 }

@@ -1,38 +1,38 @@
 "use client";
 
-import { useRef } from "react";
 import { useDrag } from "react-dnd";
-
-interface IEvent {
-  id: string | number;
-  startDate: string;
-  endDate: string;
-  title: string;
-  color: string;
-  description?: string;
-  user?: { id: string; name: string };
-}
+import { useCalendar } from "../../contexts/calendar-context";
+import { IEvent } from "../../types";
 
 export const ItemTypes = {
   EVENT: "event",
 };
 
 interface IProps {
-  event: IEvent;
   children: React.ReactNode;
+  event: IEvent;
 }
 
-export function DraggableEvent({ event, children }: IProps) {
-  const ref = useRef<HTMLDivElement>(null);
+export function DraggableEvent({ children, event }: IProps) {
+  const { enableDnd } = useCalendar();
+
+  if (!enableDnd) {
+    return <div>{children}</div>;
+  }
+
   const [{ isDragging }, drag] = useDrag(() => ({
     type: ItemTypes.EVENT,
     item: { event },
-    collect: (monitor) => ({ isDragging: monitor.isDragging() }),
+    collect: (monitor) => ({
+      isDragging: monitor.isDragging(),
+    }),
   }));
-  drag(ref);
 
   return (
-    <div ref={ref} className={isDragging ? "opacity-40" : ""}>
+    <div
+      ref={drag as unknown as React.RefObject<HTMLDivElement>}
+      className={isDragging ? "opacity-50" : ""}
+    >
       {children}
     </div>
   );

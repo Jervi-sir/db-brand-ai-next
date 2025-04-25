@@ -1,3 +1,4 @@
+// File: components/client-container.tsx
 "use client";
 
 import { useMemo } from "react";
@@ -11,14 +12,28 @@ export function ClientContainer() {
   const { events } = useCalendar();
   const filteredEvents = useMemo(() => events || [], [events]);
   const singleDayEvents = filteredEvents.filter((event) => {
-    const startDate = parseISO(event.startDate);
-    const endDate = parseISO(event.endDate);
-    return isSameDay(startDate, endDate);
+    // Skip events with invalid startDate or endDate
+    if (!event.startDate || !event.endDate) return false;
+    try {
+      const startDate = parseISO(event.startDate);
+      const endDate = parseISO(event.endDate);
+      return isSameDay(startDate, endDate);
+    } catch (error) {
+      console.error("Invalid date format for event:", event);
+      return false;
+    }
   });
   const multiDayEvents = filteredEvents.filter((event) => {
-    const startDate = parseISO(event.startDate);
-    const endDate = parseISO(event.endDate);
-    return !isSameDay(startDate, endDate);
+    // Skip events with invalid startDate or endDate
+    if (!event.startDate || !event.endDate) return false;
+    try {
+      const startDate = parseISO(event.startDate);
+      const endDate = parseISO(event.endDate);
+      return !isSameDay(startDate, endDate);
+    } catch (error) {
+      console.error("Invalid date format for event:", event);
+      return false;
+    }
   });
 
   return (

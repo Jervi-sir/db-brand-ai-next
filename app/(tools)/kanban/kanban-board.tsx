@@ -35,7 +35,7 @@ import { useMediaQuery } from 'react-responsive';
 import { cn } from '@/lib/utils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from '@/components/toast';
-import { MinimalTiptapEditor } from '@/zdeprecated/split/minimal-tiptap';
+import { MinimalTiptapEditor } from '@/app/(tools)/components/minimal-tiptap';
 
 const defaultCols = [
   { id: 'voice_over', title: 'Voice Over' },
@@ -127,7 +127,7 @@ export function KanbanBoard() {
       const newTasks: Task[] = updatedContent.map((item: any) => ({
         id: item.id,
         columnId: item.stage,
-        content: item.content,
+        content: item.generatedScript,
         scheduledDate: item.scheduledDate,
         deadline: item.deadline,
       }));
@@ -167,7 +167,7 @@ export function KanbanBoard() {
   };
 
   const handleEditScript = (script: any) => {
-    setEditingScript({ id: script.id, content: script.content });
+    setEditingScript({ id: script.id, content: script.generatedScript });
   };
 
   const handleSaveEdit = async () => {
@@ -176,7 +176,7 @@ export function KanbanBoard() {
       const response = await fetch(`/api/content/${editingScript.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content: editingScript.content }),
+        body: JSON.stringify({ content: editingScript.generatedScript }),
       });
       if (!response.ok) throw new Error('Failed to update script');
       setScripts((prev) =>
@@ -357,7 +357,7 @@ export function KanbanBoard() {
             {editingScript ? (
               <div>
                 <MinimalTiptapEditor
-                  value={editingScript.content}
+                  value={editingScript.generatedScript}
                   onChange={(value) => setEditingScript((prev: any) => ({ ...prev, content: value }))}
                   className="min-h-[200px] w-full"
                   output="html"
@@ -400,7 +400,7 @@ export function KanbanBoard() {
                         </TableCell>
                         <TableCell>{script.topic}</TableCell>
                         <TableCell>{script.mood}</TableCell>
-                        <TableCell>{stripHtml(script.content).slice(0, 50)}...</TableCell>
+                        <TableCell>{stripHtml(script.generatedScript).slice(0, 50)}...</TableCell>
                         <TableCell>
                           <Button
                             variant="outline"

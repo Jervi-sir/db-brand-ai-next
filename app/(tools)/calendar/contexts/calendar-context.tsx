@@ -1,3 +1,4 @@
+// File: contexts/calendar-context.tsx
 "use client";
 
 import { createContext, useContext, useState } from "react";
@@ -11,6 +12,7 @@ interface ICalendarContext {
   addEvent: (event: IEvent) => Promise<void>;
   updateEvent: (event: IEvent) => Promise<void>;
   deleteEvent: (id: string) => Promise<void>;
+  enableDnd: boolean;
 }
 
 const CalendarContext = createContext<ICalendarContext | undefined>(undefined);
@@ -18,18 +20,29 @@ const CalendarContext = createContext<ICalendarContext | undefined>(undefined);
 export function CalendarProvider({
   children,
   events: initialEvents,
+  enableDnd = false,
 }: {
   children: React.ReactNode;
   events: IEvent[];
+  enableDnd?: boolean;
 }) {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [events, setEvents] = useState<IEvent[]>(initialEvents);
 
   const addEvent = async (event: IEvent) => {
-    const response = await fetch('/api/content', {
+    const response = await fetch('/api/calendar/content', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(event),
+      body: JSON.stringify({
+        userId: event.userId,
+        title: event.title,
+        userPrompt: event.userPrompt,
+        color: event.color,
+        generatedScript: event.generatedScript || "",
+        stage: event.stage || "script",
+        startDate: event.startDate,
+        endDate: event.endDate,
+      }),
     });
     if (response.ok) {
       const newEvent = await response.json();
@@ -40,10 +53,15 @@ export function CalendarProvider({
   };
 
   const updateEvent = async (event: IEvent) => {
-    const response = await fetch(`/api/content/${event.id}`, {
+    const response = await fetch(`/api/calendar/content/${event.id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(event),
+      body: JSON.stringify({
+        id: event.id,
+        title: event.title,
+        userPrompt: event.userPrompt,
+        generatedScript: event.generatedScript,
+      }),
     });
     if (response.ok) {
       const updatedEvent = await response.json();
@@ -56,7 +74,7 @@ export function CalendarProvider({
   };
 
   const deleteEvent = async (id: string) => {
-    const response = await fetch(`/api/content/${id}`, {
+    const response = await fetch(`/api/calendar/content/${id}`, {
       method: 'DELETE',
     });
     if (response.ok) {
@@ -76,6 +94,7 @@ export function CalendarProvider({
         addEvent,
         updateEvent,
         deleteEvent,
+        enableDnd,
       }}
     >
       {children}

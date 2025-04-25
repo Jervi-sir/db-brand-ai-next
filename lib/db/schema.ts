@@ -258,10 +258,10 @@ export type PromptHistory = InferSelectModel<typeof promptHistory>;
 export const content = pgTable('Content', {
   id: uuid('id').primaryKey().notNull().defaultRandom(),
   userId: uuid('user_id').references(() => user.id).notNull(),
-  topic: varchar('topic', { length: 255 }).notNull(),
-  description: text('description').notNull(),
+  title: varchar('title', { length: 255 }).notNull(),
+  userPrompt: text('userPrompt').notNull(),
   mood: varchar('mood', { length: 50 }).notNull(),
-  content: text('content').notNull(),
+  generatedScript: text('generatedScript').notNull(),
   stage: varchar('stage', { length: 50 }).notNull().default('script'), // script, voice_over, creation, done
   scheduledDate: timestamp('scheduledDate'),
   deadline: timestamp('deadline'),

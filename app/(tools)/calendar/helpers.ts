@@ -174,3 +174,9 @@ export function getMonthCellEvents(
       return a.position - b.position;
     });
 }
+
+export const stripHtml = (html: string): string => {
+  const tmp = document.createElement('div');
+  tmp.innerHTML = html;
+  return tmp.textContent || tmp.innerText || '';
+};

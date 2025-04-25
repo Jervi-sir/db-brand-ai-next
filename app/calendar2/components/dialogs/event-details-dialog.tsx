@@ -57,7 +57,7 @@ export function EventDetailsDialog({ event, children }: IProps) {
               <Text className="mt-1 size-4 shrink-0" />
               <div>
                 <p className="text-sm font-medium">Description</p>
-                <p className="text-sm text-muted-foreground">{event.description}</p>
+                <p className="text-sm text-muted-foreground">{event.userPrompt}</p>
               </div>
             </div>
           </div>

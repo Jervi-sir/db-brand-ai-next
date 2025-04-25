@@ -23,7 +23,7 @@ import {
 import DOMPurify from 'dompurify';
 import { useForm } from 'react-hook-form';
 import { cn } from '@/lib/utils';
-import { MinimalTiptapEditor } from '../../../zdeprecated/split/minimal-tiptap';
+import { MinimalTiptapEditor } from '../components/minimal-tiptap';
 import { Moon, Sun } from 'lucide-react';
 import { toast } from '@/components/toast';
 

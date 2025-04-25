@@ -1,3 +1,4 @@
+// File: types.ts
 export type TCalendarView = "month";
 export type TEventColor =
   | "blue"
@@ -10,11 +11,12 @@ export type TEventColor =
 
 export interface IEvent {
   id: string;
-  startDate: string;
-  endDate: string;
+  userId?: string; // Changed from user_id to match database
   title: string;
-  color: string;
-  description?: string;
-  stage?: string;
-  content?: string;
+  userPrompt: string;
+  color: TEventColor; // Use TEventColor for type safety
+  generatedScript: string;
+  stage: string;
+  startDate: string; // Changed from scheduledDate for consistency
+  endDate: string; // Changed from deadline for consistency
 }

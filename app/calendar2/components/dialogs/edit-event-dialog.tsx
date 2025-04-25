@@ -1,8 +1,10 @@
 "use client";
 
+import { parseISO } from "date-fns";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
+import { useDisclosure } from "../../hooks/use-disclosure";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -13,37 +15,61 @@ import { Form, FormField, FormLabel, FormItem, FormControl, FormMessage } from "
 import { Select, SelectItem, SelectContent, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogHeader, DialogClose, DialogContent, DialogTrigger, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 
+import type { IEvent } from "../../interfaces";
 import type { TimeValue } from "react-aria-components";
 import type { TEventFormData } from "../../schemas";
-import { useDisclosure } from "@/app/calendar/hooks/use-disclosure";
-import { useCalendar } from "../../contexts/calendar-context";
+import { useUpdateEvent } from "../../hooks/use-update-event";
 import { eventSchema } from "../../schemas";
+import { useCalendar } from "../../contexts/calendar-context";
 
 interface IProps {
   children: React.ReactNode;
-  startDate?: Date;
-  startTime?: { hour: number; minute: number };
+  event: IEvent;
 }
 
-export function AddEventDialog({ children, startDate, startTime }: IProps) {
+export function EditEventDialog({ children, event }: IProps) {
+  const { isOpen, onClose, onToggle } = useDisclosure();
+
   const { users } = useCalendar();
 
-  const { isOpen, onClose, onToggle } = useDisclosure();
+  const { updateEvent } = useUpdateEvent();
 
   const form = useForm<TEventFormData>({
     resolver: zodResolver(eventSchema),
     defaultValues: {
-      title: "",
-      description: "",
-      startDate: typeof startDate !== "undefined" ? startDate : undefined,
-      startTime: typeof startTime !== "undefined" ? startTime : undefined,
+      user: event.user.id,
+      title: event.title,
+      description: event.userPrompt,
+      startDate: parseISO(event.startDate),
+      startTime: { hour: parseISO(event.startDate).getHours(), minute: parseISO(event.startDate).getMinutes() },
+      endDate: parseISO(event.endDate),
+      endTime: { hour: parseISO(event.endDate).getHours(), minute: parseISO(event.endDate).getMinutes() },
+      color: event.color,
     },
   });
 
-  const onSubmit = (_values: TEventFormData) => {
-    // TO DO: Create use-add-event hook
+  const onSubmit = (values: TEventFormData) => {
+    const user = users.find(user => user.id === values.user);
+
+    if (!user) throw new Error("User not found");
+
+    const startDateTime = new Date(values.startDate);
+    startDateTime.setHours(values.startTime.hour, values.startTime.minute);
+
+    const endDateTime = new Date(values.endDate);
+    endDateTime.setHours(values.endTime.hour, values.endTime.minute);
+
+    updateEvent({
+      ...event,
+      user,
+      title: values.title,
+      color: values.color,
+      description: values.userPrompt,
+      startDate: startDateTime.toISOString(),
+      endDate: endDateTime.toISOString(),
+    });
+
     onClose();
-    form.reset();
   };
 
   return (
@@ -52,9 +78,9 @@ export function AddEventDialog({ children, startDate, startTime }: IProps) {
 
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Add New Event</DialogTitle>
+          <DialogTitle>Edit Event</DialogTitle>
           <DialogDescription>
-            This is just and example of how to use the form. In a real application, you would call the API to create the event
+            This is just and example of how to use the form. In a real application, you would call the API to update the event
           </DialogDescription>
         </DialogHeader>
 
@@ -175,11 +201,9 @@ export function AddEventDialog({ children, startDate, startTime }: IProps) {
                 render={({ field, fieldState }) => (
                   <FormItem className="flex-1">
                     <FormLabel>End Time</FormLabel>
-
                     <FormControl>
                       <TimeInput value={field.value as TimeValue} onChange={field.onChange} hourCycle={12} data-invalid={fieldState.invalid} />
                     </FormControl>
-
                     <FormMessage />
                   </FormItem>
                 )}
@@ -281,7 +305,7 @@ export function AddEventDialog({ children, startDate, startTime }: IProps) {
           </DialogClose>
 
           <Button form="event-form" type="submit">
-            Create Event
+            Save changes
           </Button>
         </DialogFooter>
       </DialogContent>
