@@ -1,5 +1,4 @@
 import { format, isSameDay, parseISO, startOfDay, endOfDay } from "date-fns";
-import { DraggableEvent } from "../dnd/draggable-event";
 import { EventDetailsDialog } from "../dialogs/event-details-dialog";
 
 interface IEvent {
@@ -72,7 +71,7 @@ export function MonthEventBadge({
   const renderBadgeText = ["first", "none"].includes(position);
 
   return (
-    <DraggableEvent event={event as IEvent}>
+    <>
       <EventDetailsDialog event={event as any}>
         <div
           role="button"
@@ -90,6 +89,6 @@ export function MonthEventBadge({
           )}
         </div>
       </EventDetailsDialog>
-    </DraggableEvent>
+    </>
   );
 }

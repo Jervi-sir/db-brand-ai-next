@@ -63,7 +63,7 @@ export default function Page() {
 
       const { scripts, usage } = await response.json();
       setScripts(scripts.map((script: any) => DOMPurify.sanitize(script)));
-      setValidated(new Array(scripts.length).fill(false)); // Initialize validation state
+      setValidated(new Array(scripts.length).fill(false) as any); // Initialize validation state
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -93,7 +93,7 @@ export default function Page() {
 
       toast({ type: 'success', description: 'Script Validated!' });
       setValidated((prev) => {
-        const newValidated = [...prev];
+        const newValidated: any = [...prev];
         newValidated[index] = true; // Mark script as validated
         return newValidated;
       });
@@ -111,7 +111,7 @@ export default function Page() {
     <div className={cn('container mx-auto p-4')}>
       <div className="flex flex-col md:flex-row gap-6">
         {/* Form (Left Side) */}
-        <div className="flex-1 w-full md:w-1/3 md:pr-4 border-r-zinc-800 md:border-r-[1px]">
+        <div className="flex-1 w-full md:w-1/3 md:pr-4 border-r-zinc-800 md:border-r">
           <h2 className="text-2xl font-bold mb-4">Script Generator</h2>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -202,7 +202,7 @@ export default function Page() {
               <p className="text-gray-500 dark:text-gray-400">Generating scripts...</p>
             ) : scripts.length === 0 ? (
               <p className="text-gray-500 dark:text-gray-400">
-                No scripts generated yet. Fill out the form and click "Generate Scripts".
+                No scripts generated yet. Fill out the form and click &quot;Generate Scripts&quot;.
               </p>
             ) : (
               scripts.map((script, index) => (

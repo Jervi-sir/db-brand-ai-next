@@ -145,7 +145,7 @@ export function Chat({
                 />
               ) : (
                 <div className="relative w-full flex flex-col gap-4">
-                  <div className='h-[5rem] rounded-2xl dark:bg-zinc-950 pb-2 pt-4 border border-1 dark:border-neutral-900'>
+                  <div className='h-20 rounded-2xl dark:bg-zinc-950 pb-2 pt-4 border border-1 dark:border-neutral-900'>
                     <p className="text-red-500 text-sm pl-4 pt-1">
                       {activeModels && activeModels?.length > 0
                         ? 'Please select a model to continue.'

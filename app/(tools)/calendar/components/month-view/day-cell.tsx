@@ -1,7 +1,6 @@
 import { useMemo } from "react";
 import { isToday, startOfDay } from "date-fns";
 import { EventBullet } from "./event-bullet";
-import { DroppableDayCell } from "../dnd/droppable-day-cell";
 import { MonthEventBadge } from "./month-event-badge";
 import { getMonthCellEvents } from "../../helpers";
 
@@ -38,7 +37,7 @@ export function DayCell({ cell, events, eventPositions }: IProps) {
   const isSunday = date.getDay() === 0;
 
   return (
-    <DroppableDayCell cell={cell}>
+    <>
       <div
         className={`flex h-full flex-col gap-1 border-l border-t py-1.5 lg:py-2 ${
           isSunday ? "border-l-0" : ""
@@ -97,6 +96,6 @@ export function DayCell({ cell, events, eventPositions }: IProps) {
           </p>
         )}
       </div>
-    </DroppableDayCell>
+    </>
   );
 }

@@ -113,7 +113,7 @@ export function TaskCard({ task, moveTaskToStage }: TaskCardProps) {
   return (
     <>
       <Card>
-        <CardHeader className="px-3 py-3 flex flex-row border-b-2 border-secondary relative items-center">
+        <CardHeader className="p-3 flex flex-row border-b-2 border-secondary relative items-center">
           <p>{task.title}</p>
           <Badge variant={badgeProps.variant} className="ml-auto font-semibold">
             {badgeProps.text}
@@ -128,7 +128,7 @@ export function TaskCard({ task, moveTaskToStage }: TaskCardProps) {
               onClick={() => setIsDialogOpen(true)}
               aria-label="View full script"
             >
-              <Eye className="h-4 w-4" />
+              <Eye className="size-4" />
             </Button>
           </div>
           {task.scheduledDate && (
@@ -195,7 +195,7 @@ export function TaskCard({ task, moveTaskToStage }: TaskCardProps) {
                   onClick={() => setIsEditEnabled(!isEditEnabled)}
                   aria-label={isEditEnabled ? 'Disable editing' : 'Enable editing'}
                 >
-                  <Pencil className="h-4 w-4 mr-2" />
+                  <Pencil className="size-4 mr-2" />
                   {isEditEnabled ? 'Disable Edit' : 'Enable Edit'}
                 </Button>
               </div>

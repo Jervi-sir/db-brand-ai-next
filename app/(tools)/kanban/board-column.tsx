@@ -18,14 +18,14 @@ interface BoardColumnProps {
 
 export function BoardColumn({ column, tasks, moveTaskToStage }: BoardColumnProps) {
   return (
-    <Card className="h-[500px] max-h-[500px] w-[350px] max-w-full bg-primary-foreground flex flex-col flex-shrink-0 snap-center">
+    <Card className="h-[500px] max-h-[500px] w-[350px] max-w-full bg-primary-foreground flex flex-col shrink-0 snap-center">
       <CardHeader className="p-4 font-semibold border-b-2 text-left flex flex-row items-center">
         <span className={column.id !== 'all-tasks' ? 'flex-1' : 'flex-1 text-center'}>
           {column.title}
         </span>
       </CardHeader>
       <ScrollArea>
-        <CardContent className="flex flex-grow flex-col gap-2 p-2">
+        <CardContent className="flex grow flex-col gap-2 p-2">
           {tasks.map((task) => (
             <TaskCard
               key={task.id}
