@@ -258,7 +258,10 @@ export default function Page() {
           <BoardColumn
             key="all-tasks"
             column={{ id: "all-tasks", title: "All Tasks" }}
-            tasks={tasks}
+            tasks={[...tasks].sort((a, b) => {
+              const order = ['voice_over', 'creation', 'done'];
+              return order.indexOf(a.columnId) - order.indexOf(b.columnId);
+            })}
             moveTaskToStage={moveTaskToStage}
           />
         ) : (
@@ -395,7 +398,7 @@ function BoardColumn({ column, tasks, moveTaskToStage }: {
   moveTaskToStage?: (taskId: string, direction: 'next' | 'previous') => void,
 }) {
   return (
-    <Card className="h-[500px] max-h-[500px] w-[350px] max-w-full bg-primary-foreground flex flex-col shrink-0 snap-center">
+    <Card className="h-[500px] max-h-[500px] max-w-[350px] min-w-[300px] bg-primary-foreground flex flex-col shrink-0 snap-center">
       <CardHeader className="p-4 font-semibold border-b-2 text-left flex flex-row items-center">
         <span className={column.id !== 'all-tasks' ? 'flex-1' : 'flex-1 text-center'}>
           {column.title}
@@ -418,8 +421,8 @@ function BoardColumn({ column, tasks, moveTaskToStage }: {
 
 function BoardContainer({ children }: { children: React.ReactNode }) {
   return (
-    <ScrollArea className="px-2 md:px-0 flex lg:justify-center pb-4 snap-x snap-mandatory">
-      <div className="flex gap-4 items-center flex-row justify-center">
+    <ScrollArea className="md:px-0 flex lg:justify-center pb-4 snap-x snap-mandatory max-w-screen-sm md:max-w-max">
+      <div className="flex gap-4 items-center flex-row justify-center max-w-screen-sm md:max-w-max">
         {children}
       </div>
       <ScrollBar orientation="horizontal" />

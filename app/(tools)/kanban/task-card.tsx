@@ -47,6 +47,10 @@ export function TaskCard({ task, moveTaskToStage }: TaskCardProps) {
   const [localTask, setLocalTask] = useState(task);
   const [isRescheduled, setIsRescheduled] = useState(false);
 
+  useEffect(() => {
+    setLocalTask(task);
+    setEditedScript(task.generatedScript);
+  }, [task]);
   // Fetch suggested reschedule date when dialog opens
   useEffect(() => {
     if (isRescheduleDialogOpen) {
@@ -110,7 +114,7 @@ export function TaskCard({ task, moveTaskToStage }: TaskCardProps) {
   // Check if deadline has passed (deadline is today or before today, ignoring hours)
   const isDeadlinePassed = localTask.deadline
     ? isSameDay(parseISO(localTask.deadline), new Date()) ||
-      isBefore(startOfDay(parseISO(localTask.deadline)), startOfDay(new Date()))
+    isBefore(startOfDay(parseISO(localTask.deadline)), startOfDay(new Date()))
     : false;
 
   // Truncate script to 100 characters
