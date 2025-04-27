@@ -18,6 +18,8 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { TaskCard } from "./task-card";
 
+const parPage = 10;
+
 export default function Page() {
   const [columns] = useState<Column[]>(defaultCols);
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -56,7 +58,7 @@ export default function Page() {
   useEffect(() => {
     const fetchScripts = async () => {
       try {
-        const response = await fetch(`/kanban/api/content?page=${page}&limit=10`);
+        const response = await fetch(`/kanban/api/content?page=${page}&limit=${parPage}`);
         if (!response.ok) throw new Error("Failed to fetch scripts");
         const { scripts: fetchedScripts, total } = await response.json();
         setScripts(fetchedScripts);
@@ -95,6 +97,7 @@ export default function Page() {
       setTasks((prev) => [...prev, ...newTasks]);
       setIsDialogOpen(false);
       setSelectedScripts([]);
+      setScripts([]);
       toast({
         type: "success",
         description: "Voice-overs scheduled successfully.",
@@ -359,7 +362,7 @@ export default function Page() {
                   Previous
                 </Button>
                 <Button
-                  disabled={page * 10 >= totalScripts}
+                  disabled={page * parPage >= totalScripts}
                   onClick={() => setPage((prev) => prev + 1)}
                 >
                   Next
