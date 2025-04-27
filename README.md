@@ -95,10 +95,11 @@ https://github.com/Jervi-sir/big-calendar-offf-full
   },
     "db-brand-ai-next": {
     "msDuration": 43623436,
-    "duration": "12h 7m"
+    "duration": "12h 7m",
+    "duration": "24h 50m"
   },
 
 =====================================
-Total = 12h 14m + 49m + 39m + 13h 8m + 27m + 26h 7m + 12h 7m
-      = 63h
+Total = 12h 14m + 49m + 39m + 13h 8m + 27m + 26h 7m + 24h 50m
+      = 75h
 =====================================

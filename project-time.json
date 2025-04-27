@@ -40,8 +40,8 @@
     "duration": "27m"
   },
   "op_app": {
-    "msDuration": 2375103,
-    "duration": "39m"
+    "msDuration": 3270820,
+    "duration": "54m"
   },
   "op_coming_soon": {
     "msDuration": 574036,
@@ -140,8 +140,8 @@
     "duration": "30m"
   },
   "op_app_2.8": {
-    "msDuration": 157615519,
-    "duration": "43h 46m"
+    "msDuration": 246804971,
+    "duration": "68h 33m"
   },
   "ai prompts": {
     "msDuration": 275304,
@@ -156,8 +156,8 @@
     "duration": "4m"
   },
   "octa_api_": {
-    "msDuration": 30051911,
-    "duration": "8h 20m"
+    "msDuration": 77842080,
+    "duration": "21h 37m"
   },
   "big-calendar-offf-full": {
     "msDuration": 124859,
@@ -180,13 +180,13 @@
     "duration": "43m"
   },
   "db-brand-ai-next": {
-    "msDuration": 43623436,
-    "duration": "12h 7m"
+    "msDuration": 89416672,
+    "duration": "24h 50m"
   },
   "shadcn-minimal-tiptap": {
     "msDuration": 732246,
     "duration": "12m"
   },
   "startDate": "2025-04-07T14:12:25.585Z",
-  "endDate": "2025-04-22T13:53:07.079Z"
+  "endDate": "2025-04-27T03:28:50.287Z"
 }
