@@ -169,6 +169,13 @@
       "when": 1745600671142,
       "tag": "0023_orange_zuras",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1745701083857,
+      "tag": "0024_curly_blob",
+      "breakpoints": true
     }
   ]
 }

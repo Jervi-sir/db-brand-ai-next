@@ -1,4 +1,4 @@
-import { CalendarProvider } from "./contexts/calendar-context";
+import { CalendarProvider } from "./calendar-context";
 import { SessionProvider } from "next-auth/react";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";

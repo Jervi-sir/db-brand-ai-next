@@ -51,7 +51,7 @@ export default function Page() {
     setUsage({ promptTokens: '', completionTokens: '', totalTokens: '' });
 
     try {
-      const response = await fetch('/api/generate-scripts', {
+      const response = await fetch('/split/api/generate-scripts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
@@ -73,7 +73,7 @@ export default function Page() {
 
   const handleValidate = async (script: any, index: number) => {
     try {
-      const response = await fetch('/api/content/save', {
+      const response = await fetch('/split/api/save', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -164,10 +164,10 @@ export default function Page() {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="blue">Happy</SelectItem>
-                        <SelectItem value="gray">Serious</SelectItem>
-                        <SelectItem value="yellow">Funny</SelectItem>
-                        <SelectItem value="red">Dramatic</SelectItem>
+                        <SelectItem value="happy">Happy</SelectItem>
+                        <SelectItem value="serious">Serious</SelectItem>
+                        <SelectItem value="funny">Funny</SelectItem>
+                        <SelectItem value="dramatic">Dramatic</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />

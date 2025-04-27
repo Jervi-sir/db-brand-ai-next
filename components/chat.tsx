@@ -60,7 +60,6 @@ export function Chat({
     generateId: generateUUID,
     onFinish: ({ id, annotations }, { usage }) => {
       // Update the specific message with usage data
-      // console.log('annotations: ', annotations)
       setMessages((prevMessages: any[]) =>
         prevMessages.map((msg) =>
           msg.id === id

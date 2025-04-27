@@ -1,0 +1,1 @@
+CREATE INDEX IF NOT EXISTS "idx_content_stage_deadline" ON "Content" USING btree ("stage","deadline");

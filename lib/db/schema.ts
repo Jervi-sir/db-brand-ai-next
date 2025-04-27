@@ -270,5 +270,6 @@ export const content = pgTable('Content', {
 },
 (table) => ({
   calendarIdx: index('idx_content_stage_scheduledDate').on(table.stage, table.scheduledDate),
+  deadlineIdx: index('idx_content_stage_deadline').on(table.stage, table.deadline), // Optional
 })
 );
