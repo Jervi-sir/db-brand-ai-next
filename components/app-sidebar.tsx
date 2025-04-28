@@ -21,7 +21,7 @@ import {
 } from '@/components/ui/sidebar';
 import Link from 'next/link';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
-import { CalendarCheck2Icon, CalendarCogIcon, CalendarDaysIcon, CalendarFoldIcon, CalendarIcon, CalendarOffIcon, CalendarX2Icon, KanbanIcon, KanbanSquareIcon, SplitIcon, SplitSquareHorizontalIcon } from 'lucide-react';
+import { CalendarCheck2Icon, CalendarCogIcon, CalendarDaysIcon, CalendarFoldIcon, CalendarIcon, CalendarOffIcon, CalendarX2Icon, KanbanIcon, KanbanSquareIcon, ListIcon, SplitIcon, SplitSquareHorizontalIcon } from 'lucide-react';
 import React from 'react';
 import { ExtendedUser } from '@/app/(auth)/auth';
 
@@ -76,7 +76,8 @@ export function AppSidebar({ user }: { user: ExtendedUser | undefined }) {
               {[
                 { name: 'Split', icon: <SplitSquareHorizontalIcon />, url: '/split' },
                 { name: 'Kanban', icon: <KanbanSquareIcon />, url: '/kanban' },
-                { name: 'Schedule', icon: <CalendarIcon />, url: '/calendar' },
+                { name: 'Calendar', icon: <CalendarIcon />, url: '/calendar' },
+                { name: 'Todo List', icon: <ListIcon />, url: '/todo-list' },
               ].map((item, index) => {
                 // Get the base path segment (e.g., "kanban" or "calendar")
                 const pathSegment = item.url.split('/').filter(Boolean)[0];

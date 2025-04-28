@@ -18,7 +18,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { TaskCard } from "./task-card";
 
-const parPage = 10;
+const parPage = 7;
 
 export default function Page() {
   const [columns] = useState<Column[]>(defaultCols);

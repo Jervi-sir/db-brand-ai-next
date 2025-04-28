@@ -231,14 +231,19 @@ export default function Page() {
                       onClick={() => handleValidate(script, index)}
                       disabled={validated[index]} // Disable if validated
                     >
-                      {validated[index] ? 'Validated' : 'Validate'} {/* Change text based on state */}
+                      {validated[index] ? 'Validated' : 'Validate'}
                     </Button>
-                    <Button
-                      variant="destructive"
-                      onClick={() => handleDelete(index)}
-                    >
-                      Delete
-                    </Button>
+                    {validated[index]
+                      ? null
+                      :
+                      <Button
+                        variant="destructive"
+                        onClick={() => handleDelete(index)}
+                      >
+                        Delete
+                      </Button>
+                    }
+
                   </div>
                 </div>
               ))

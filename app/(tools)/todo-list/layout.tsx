@@ -1,4 +1,3 @@
-import { CalendarProvider } from "./calendar-context";
 import { SessionProvider } from "next-auth/react";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
@@ -25,7 +24,7 @@ export default async function Layout({ children }: { children: React.ReactNode }
               <div className="flex items-center gap-2 px-3">
                 <SidebarTrigger />
                 <Separator orientation="vertical" className="mr-2 h-4" />
-                <h4>Calendar</h4>
+                <h4>Todo</h4>
               </div>
             </header>
             <div className="flex flex-col gap-4 px-2 py-4">
