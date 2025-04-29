@@ -14,14 +14,13 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { useMediaQuery } from 'react-responsive';
 import { toast } from '@/components/toast';
 import { MinimalTiptapEditor } from '@/app/(tools)/components/minimal-tiptap';
-import { addDays } from 'date-fns';
 import { Task } from './types';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { TaskCard } from './task-card';
-import { Badge } from '@/components/ui/badge';
 
 const parPage = 10;
+const MAX_TASKS_DISPLAY = 3; // Maximum number of tasks to display
 
 export default function Page() {
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -38,7 +37,8 @@ export default function Page() {
       const response = await fetch(`/todo-list/api/todo`);
       if (!response.ok) throw new Error('Failed to fetch content');
       const data = await response.json();
-      setTasks(data);
+      // Limit to MAX_TASKS_DISPLAY when fetching initial tasks
+      setTasks(data.slice(0, MAX_TASKS_DISPLAY));
     } catch (error) {
       toast({
         type: 'error',
@@ -108,7 +108,13 @@ export default function Page() {
         scheduledDate: item.scheduledDate,
         deadline: item.deadline,
       }));
-      setTasks((prev) => [...prev, ...newTasks]);
+
+      // Add new tasks, but ensure only up to MAX_TASKS_DISPLAY are kept
+      setTasks((prev) => {
+        const updatedTasks = [...prev, ...newTasks];
+        return updatedTasks.slice(0, MAX_TASKS_DISPLAY);
+      });
+
       setIsDialogOpen(false);
       setSelectedScripts([]);
       setScripts([]);
@@ -126,18 +132,15 @@ export default function Page() {
 
   const handleDeleteScript = async (scriptId: string) => {
     try {
-      // Delete the script
       const deleteResponse = await fetch(`/todo-list/api/content/${scriptId}`, {
         method: 'DELETE',
       });
       if (!deleteResponse.ok) throw new Error('Failed to delete script');
 
-      // Update scripts and selectedScripts state
       setScripts((prev) => prev.filter((script) => script.id !== scriptId));
       setSelectedScripts((prev) => prev.filter((s) => s.id !== scriptId));
-      setTotalScripts((prev) => prev - 1); // Decrease total count
+      setTotalScripts((prev) => prev - 1);
 
-      // Fetch the next available script
       const excludeIds = scripts.map((s) => s.id).filter((id) => id !== scriptId);
       const nextScriptResponse = await fetch(
         `/todo-list/api/content/next?exclude=${excludeIds.join(',')}`
@@ -147,7 +150,7 @@ export default function Page() {
       const newScript = await nextScriptResponse.json();
       if (newScript) {
         setScripts((prev) => [...prev, newScript]);
-        setTotalScripts((prev) => prev + 1); // Increment total count for new script
+        setTotalScripts((prev) => prev + 1);
       }
 
       toast({
@@ -212,21 +215,24 @@ export default function Page() {
             const response = await fetch(`/todo-list/api/content/next?exclude=${excludeIds}`);
             if (!response.ok) throw new Error('Failed to fetch next task');
             const newTask = await response.json();
-            if (newTask) {
-              setTasks((current) => {
-                const existingIds = new Set(current.map((t) => t.id));
+            if (newTask && updatedTasks.length < MAX_TASKS_DISPLAY) {
+              setTasks((current: any) => {
+                const existingIds = new Set(current.map((t: any) => t.id));
                 if (existingIds.has(newTask.id)) {
                   console.warn(`Duplicate task ID ${newTask.id} detected, skipping.`);
                   return current;
                 }
-                return [...current, {
-                  id: newTask.id,
-                  title: newTask.title,
-                  columnId: 'voice_over', // Default to 'voice_over' for new tasks
-                  generatedScript: newTask.generatedScript,
-                  scheduledDate: newTask.scheduledDate || null,
-                  deadline: newTask.deadline || null,
-                }];
+                return [
+                  ...current,
+                  {
+                    id: newTask.id,
+                    title: newTask.title,
+                    columnId: 'voice_over',
+                    generatedScript: newTask.generatedScript,
+                    scheduledDate: newTask.scheduledDate || null,
+                    deadline: newTask.deadline || null,
+                  },
+                ].slice(0, MAX_TASKS_DISPLAY);
               });
             }
           } catch (error) {
@@ -259,8 +265,7 @@ export default function Page() {
         .animate-appear {
           animation: appear 500ms ease-out;
         }
-      `}
-      </style>
+      `}</style>
       <div className="flex flex-col md:flex-row gap-4 items-center justify-between max-w-[1080px] mx-auto pb-4">
         <div className="w-full md:w-auto px-2">
           <Button className="w-full" onClick={() => setIsDialogOpen(true)}>

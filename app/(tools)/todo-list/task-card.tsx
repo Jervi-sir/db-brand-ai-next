@@ -73,7 +73,7 @@ export function TaskCard({ task, onUpdateTask, onRemoveTask }: TaskCardProps) {
 
   const isDeadlinePassed = localTask.deadline
     ? isSameDay(parseISO(localTask.deadline), new Date()) ||
-      isBefore(startOfDay(parseISO(localTask.deadline)), startOfDay(new Date()))
+    isBefore(startOfDay(parseISO(localTask.deadline)), startOfDay(new Date()))
     : false;
 
   const truncatedScript =
@@ -177,9 +177,8 @@ export function TaskCard({ task, onUpdateTask, onRemoveTask }: TaskCardProps) {
 
       toast({
         type: 'success',
-        description: `Task moved to ${
-          newStage === 'voice_over' ? 'Voice Over' : newStage === 'creation' ? 'Creation' : 'Done'
-        } stage.`,
+        description: `Task moved to ${newStage === 'voice_over' ? 'Voice Over' : newStage === 'creation' ? 'Creation' : 'Done'
+          } stage.`,
       });
     } catch (error) {
       toast({
@@ -195,21 +194,23 @@ export function TaskCard({ task, onUpdateTask, onRemoveTask }: TaskCardProps) {
     <>
       <Card
         className={cn(
-          'min-h-[300px] transition-all duration-500 ease-out flex flex-col',
+          'overflow-hidden min-h-[300px] transition-all duration-500 ease-out flex flex-col',
           isVanishing ? 'opacity-0 scale-95' : 'opacity-100 scale-100',
           'animate-appear'
         )}
       >
-        <CardHeader className="p-3 py-1 flex flex-row border-b-2 border-secondary relative items-center justify-between gap-1">
+        <CardHeader className={cn(
+          "p-3 py-1 flex flex-row border-b-2 border-secondary relative items-center justify-between gap-1",
+          localTask.columnId === 'voice_over' && 'bg-gray-950',
+          localTask.columnId === 'creation' && 'bg-emerald-950',
+          localTask.columnId === 'done' && 'bg-stone-800',
+        )}>
           <p className="text-sm">{localTask.title || 'Untitled Task'}</p>
           <div className="flex flex-col items-end gap-0.5">
             <Badge
               variant="default"
               className={cn(
                 'font-semibold',
-                localTask.columnId === 'voice_over' && 'bg-blue-500',
-                localTask.columnId === 'creation' && 'bg-green-500',
-                localTask.columnId === 'done' && 'bg-gray-500',
                 'p-0 px-3'
               )}
             >

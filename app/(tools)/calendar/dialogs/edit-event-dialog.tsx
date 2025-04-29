@@ -6,7 +6,15 @@ import { format, parseISO } from "date-fns";
 import { useForm, Controller } from "react-hook-form";
 import { useCalendar } from "../calendar-context";
 import { IEvent, TEventColor } from "../types";
-import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogClose, } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogFooter,
+  DialogTitle,
+  DialogClose,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -110,9 +118,9 @@ export function EditEventDialog({ children, event }: IProps) {
                     rules={{ required: "Generated script is required" }}
                     render={({ field }) => (
                       <MinimalTiptapEditor
-                        value={field.value}
-                        onChange={field.onChange}
-                        className="min-h-[200px] p-2 w-full"
+                        value={field.value || ""} // Ensure value is never undefined
+                        onChange={(value) => field.onChange(value || "")} // Ensure onChange always passes a string
+                        className="min-h-[200px] p-2 pt-0 w-full"
                         output="html"
                         editable={true}
                         placeholder="Edit generated script..."
@@ -133,9 +141,7 @@ export function EditEventDialog({ children, event }: IProps) {
             <DialogClose asChild>
               <Button variant="outline">Cancel</Button>
             </DialogClose>
-            <Button type="submit" onClick={form.handleSubmit(onSubmit)}>
-              Save Changes
-            </Button>
+            <Button type="submit">Save Changes</Button>
           </DialogFooter>
         </form>
       </DialogContent>

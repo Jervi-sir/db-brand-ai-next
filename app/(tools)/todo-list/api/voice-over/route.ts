@@ -18,6 +18,7 @@ export async function POST(request: Request) {
   }
 
   try {
+    // Verify that all provided content IDs belong to the user
     const existingContent = await db
       .select({ id: content.id })
       .from(content)
@@ -30,17 +31,19 @@ export async function POST(request: Request) {
       );
     }
 
+    // Get today's midnight for comparison
     const now = new Date();
     const todayMidnight = new Date(now);
     todayMidnight.setHours(0, 0, 0, 0);
 
+    // Fetch all future deadlines for the user's 'voice_over' content
     const existingTasks = await db
       .select({ deadline: content.deadline })
       .from(content)
       .where(
         and(
           eq(content.userId, userId),
-          eq(content.stage, 'todo'), // Check 'todo' tasks
+          eq(content.stage, 'voice_over'),
           gt(content.deadline, todayMidnight)
         )
       )
@@ -48,36 +51,62 @@ export async function POST(request: Request) {
 
     let startSchedulingDate: Date;
 
+    // Filter valid (non-null) future deadlines
     const validDeadlines = existingTasks
       .filter((task) => task.deadline !== null)
       .map((task) => new Date(task.deadline!));
 
-    if (validDeadlines.length === 0) {
-      startSchedulingDate = new Date(now);
-      startSchedulingDate.setDate(now.getDate() + 3);
+    if (validDeadlines.length > 0) {
+      // If there are future deadlines, start scheduling after the latest one
+      const latestDeadline = validDeadlines[validDeadlines.length - 1];
+      startSchedulingDate = new Date(latestDeadline);
+      startSchedulingDate.setDate(latestDeadline.getDate() + 2); // Start on the next alternate day
       startSchedulingDate.setHours(23, 0, 0, 0);
     } else {
-      const latestDeadline = validDeadlines[validDeadlines.length - 1];
-      const lastIndex = validDeadlines.length - 1;
-      const daysToAddForNext = lastIndex === 0 ? 2 : lastIndex === 1 ? 2 : 3;
-      startSchedulingDate = new Date(latestDeadline);
-      startSchedulingDate.setDate(latestDeadline.getDate() + daysToAddForNext);
-      startSchedulingDate.setHours(23, 0, 0, 0);
+      // No future deadlines; check for deadlines from two days ago
+      const twoDaysAgo = new Date(todayMidnight);
+      twoDaysAgo.setDate(todayMidnight.getDate() - 2);
+
+      const recentTasks = await db
+        .select({ deadline: content.deadline })
+        .from(content)
+        .where(
+          and(
+            eq(content.userId, userId),
+            eq(content.stage, 'voice_over'),
+            gt(content.deadline, twoDaysAgo)
+          )
+        );
+
+      const recentDeadlines = recentTasks
+        .filter((task) => task.deadline !== null)
+        .map((task) => new Date(task.deadline!));
+
+      if (recentDeadlines.length > 0) {
+        // If there are recent deadlines, start scheduling from the latest one
+        const latestRecentDeadline = recentDeadlines[recentDeadlines.length - 1];
+        startSchedulingDate = new Date(latestRecentDeadline);
+        startSchedulingDate.setDate(latestRecentDeadline.getDate() + 2); // Next alternate day
+        startSchedulingDate.setHours(23, 0, 0, 0);
+      } else {
+        // No recent deadlines; start scheduling from 3 days ahead
+        startSchedulingDate = new Date(todayMidnight);
+        startSchedulingDate.setDate(todayMidnight.getDate() + 3);
+        startSchedulingDate.setHours(23, 0, 0, 0);
+      }
     }
 
+    // Schedule each content item on alternate days
     const updatedContent = await Promise.all(
       contentIds.map(async (contentId: string, index: number) => {
-        const daysToAdd =
-          index === 0 ? 0 : index === 1 ? 2 : index === 2 ? 4 : 3 * index - 2;
-
         const deadline = new Date(startSchedulingDate);
-        deadline.setDate(startSchedulingDate.getDate() + daysToAdd);
+        deadline.setDate(startSchedulingDate.getDate() + 2 * index); // Alternate days (every 2 days)
         deadline.setHours(23, 0, 0, 0);
 
         return db
           .update(content)
           .set({
-            stage: 'todo', // Set to 'todo'
+            stage: 'voice_over',
             deadline,
             scheduledDate: null,
             updatedAt: new Date(),
