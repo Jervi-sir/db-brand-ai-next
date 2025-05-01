@@ -208,18 +208,18 @@ export default function Page() {
                       <Textarea
                         placeholder="Include: Niche (e.g., cooking), Short intro (e.g., I'm ..., an Algerian chef), Product/Service (e.g., recipe book), Target audience, Best-performing content (optional, e.g., couscous video got 100K views)"
                         className="resize-vertical"
-                        maxLength={300}
+                        maxLength={maxCharacter}
                         {...field}
                         onChange={(e) => handlePromptChange(e.target.value)}
                       />
                     </FormControl>
                     <p
                       className={cn(
-                        'text-sm mt-1',
+                        'text-xs mt-1 text-right',
                         getCharCountColor(field.value.length)
                       )}
                     >
-                      {field.value.length}/300 characters
+                      {field.value.length}/{ maxCharacter }
                     </p>
                     <FormMessage />
                   </FormItem>
