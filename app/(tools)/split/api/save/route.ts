@@ -1,8 +1,27 @@
-// app/api/content/save/route.ts
+// app/split/api/save/route.ts
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db/queries';
 import { content } from '@/lib/db/schema';
 import { auth } from '@/app/(auth)/auth';
+
+// TypeScript interfaces
+interface SaveRequest {
+  title: string;
+  userPrompt: string;
+  mood: string;
+  generatedScript: string;
+  stage: string;
+}
+
+interface SavedContent {
+  id: string;
+  userId: string;
+  title: string;
+  userPrompt: string;
+  generatedScript: string;
+  mood: string;
+  stage: string;
+}
 
 export async function POST(request: Request) {
   try {
@@ -13,7 +32,7 @@ export async function POST(request: Request) {
     }
 
     // Parse the request body
-    const { title, userPrompt, mood, generatedScript, stage, scheduledDate, deadline } = await request.json();
+    const { title, userPrompt, mood, generatedScript, stage }: SaveRequest = await request.json();
 
     if (!title || !userPrompt || !mood || !generatedScript) {
       return new Response('Title, user prompt, mood, and generated script are required', { status: 400 });
@@ -28,26 +47,24 @@ export async function POST(request: Request) {
         userPrompt,
         mood,
         generatedScript,
-        stage: 'script',
-        // scheduledDate: scheduledDate ? new Date(scheduledDate) : new Date(),
-        // deadline: deadline ? new Date(deadline) : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        stage,
         createdAt: new Date(),
         updatedAt: new Date(),
       })
       .returning();
 
-    // Return the saved content in the format expected by the calendar
-    return NextResponse.json({
+    // Return the saved content
+    const response: SavedContent = {
       id: newContent.id,
       userId: newContent.userId,
       title: newContent.title,
       userPrompt: newContent.userPrompt,
       generatedScript: newContent.generatedScript,
-      color: newContent.mood, // Map mood to color for calendar
+      mood: newContent.mood,
       stage: newContent.stage,
-      // startDate: newContent.scheduledDate ? newContent.scheduledDate.toISOString() : new Date().toISOString(),
-      // endDate: newContent.deadline ? newContent.deadline.toISOString() : new Date().toISOString(),
-    });
+    };
+
+    return NextResponse.json(response);
   } catch (error) {
     console.error('Error saving script:', error);
     return NextResponse.json(

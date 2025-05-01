@@ -38,7 +38,7 @@ export default async function RootLayout({
   return (
     <html
       lang="en"
-      className={beiruti.className}
+      className={inter.className}
       suppressHydrationWarning
     >
       <head>
