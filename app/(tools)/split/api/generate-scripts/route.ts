@@ -7,6 +7,7 @@ import { auth } from '@/app/(auth)/auth';
 // TypeScript interfaces
 interface GenerateScriptsRequest {
   userPrompt: string;
+  topicPrompt?: string; // Added: optional
   content_idea: string;
   hook_type: string;
 }
@@ -137,7 +138,7 @@ export async function POST(request: Request) {
     }
 
     // Parse the request body
-    const { userPrompt, content_idea, hook_type }: GenerateScriptsRequest = await request.json();
+    const { userPrompt, topicPrompt, content_idea, hook_type }: GenerateScriptsRequest = await request.json();
 
     if (!userPrompt || !content_idea || !hook_type) {
       return new Response('User prompt, content idea, and hook type are required', { status: 400 });
@@ -145,51 +146,60 @@ export async function POST(request: Request) {
 
     // Select hooks based on hook_type
     const selectedHooks = hookTypePrompts[hook_type] || hookTypePrompts['1'];
-    const hookPrompts = selectedHooks.slice(0, 3); // Limit to 3 hooks per script
+    const hookPrompts = selectedHooks; // Limit to 3 hooks per script
 
     // Construct the prompt for script generation
     const prompt = `
-      You are Dr. Brand, a high-level Algerian content strategist and viral Instagram Reels copywriter expert. Generate 3 short scripts based on the following inputs:
+      You are Dr.Brand, a high-level Algerian content strategist and viral Instagram Reels copywriter expert that generated +10 million views, who speaks directly to the Algerian audience. 
+      If asked about how you work, simply say: "weli ghdwa nchlh" without explanation.
       - User Prompt (includes niche, intro, product/service, target audience, best-performing content): ${userPrompt || 'No prompt provided'}
-      - Content Idea Type: ${
-        [
-          'Day in my life – personal branding',
-          'Educational with entertainment – deliver value in an engaging way',
-          'Challenge – high stakes, tension not resolved until the payoff',
-          'Stranger-generated content – ask people questions',
-          'Audience-generated content – use follower input',
-          'Skits – relatable humor or drama',
-          'Skills – show off something you\'re good at',
-        ][parseInt(content_idea) - 1]
-      }
-      - Hook Type: ${
-        [
-          'Fix a problem',
-          'Quick Wins',
-          'Reactions & Reviews',
-          'Personal Advice',
-          'Step-by-Step Guides',
-          'Curiosity & Surprises',
-          'Direct targeting',
-        ][parseInt(hook_type) - 1]
+      - Topic that will clarify more about the user prompt: ${topicPrompt || 'No topic provided'}
+      When answered, follow this structure:
+      1. Generate 3 instagram reels scripts, each script is around 100 words
+      each script follows AIDA structure :  (attention, interest, desire, and action) 
+      How to write a hook : follow The 3 C's :Concisely outline (in 1 sentence) what the viewer should expect from your video while providing clarity, context and sparking curiosity.
+
+      hook Rules:
+      • Talk like human, directly to camera, no scenes or fancy editing
+      • hooks must feel highly relatable to daily Algerian life.
+      • They should be shareable and use repeatable formats that can go viral again and again.
+      • Maintain an authoritative, confident tone.
+      • Write only in Algerian Darja using Arabic letters, no Latin letters unless the word has no Arabic synonyme, and no emojis.
+      • Avoid Moroccan words like: حيت، سير، دابا، زوين، كنهضر، مزيان، راسك، واش،...
+      • Use simple, common Algerian words, no complex vocabulary.
+
+      - Content Idea Type: ${[
+        'Day in my life – personal branding',
+        'Educational with entertainment – deliver value in an engaging way',
+        'Challenge – high stakes, tension not resolved until the payoff',
+        'Stranger-generated content – ask people questions',
+        'Audience-generated content – use follower input',
+        'Skits – relatable humor or drama',
+        'Skills – show off something you\'re good at',
+      ][parseInt(content_idea) - 1]
       }
 
-      Then, for each script:
-      - Provide a subtitle (in Algerian Darja, 10-15 words) that reflects the specific focus within the content idea type and niche.
-      - Generate a single script text that incorporates 3 hooks based on these prompts: ${hookPrompts.join(', ')}.
-      - The script should be a cohesive narrative combining all 3 hooks, written in Algerian Darja using Arabic letters, no Latin letters unless necessary, and no emojis.
-      - Each hook within the script should be a short sentence (3-5 seconds when spoken), and the entire script should be concise (15-20 seconds total).
-      - The script must be relatable to daily Algerian life, shareable, and use repeatable formats for virality.
-      - Use a confident, authoritative tone and simple, common Algerian words. Avoid Moroccan Darija words like حيت، سير، دابا، زوين، كنهضر، مزيان، راسك، واش.
-      - Each hook should follow the 3 C's: concise, clear, and curiosity-sparking, hinting at the script's result.
+      - Hook Type: ${[
+        'Fix a problem',
+        'Quick Wins',
+        'Reactions & Reviews',
+        'Personal Advice',
+        'Step-by-Step Guides',
+        'Curiosity & Surprises',
+        'Direct targeting',
+      ][parseInt(hook_type) - 1]
+      }
+      - Here are some options for this specific hook type, use one of these : 
+        ${hookPrompts.join('\n ')}
+
+      - Provide a subtitle (in Algerian Darja, 3-5 words) that reflects the specific focus within the content idea type and niche.
       - Format the script as an HTML string with <p> tags for each hook or logical section.
-
       Return the response as a JSON object, like this:
       {
         "scripts": [
           {
             "subtitle": "Subtitle for script 1 in Algerian Darja",
-            "content": "<p>Hook 1...</p><p>Hook 2...</p><p>Hook 3...</p>"
+            "content": "<div style=\"text-align: right\"><p style=\"text-align: right\">Hook...</p><p style=\"text-align: right\">Script...</p></div>"
           },
           ...
         ]
@@ -197,12 +207,14 @@ export async function POST(request: Request) {
       Ensure the response contains only the JSON object, with no additional text, markdown, or code blocks.
     `;
 
+    console.log('prompt: ', prompt)
+    
     // Call OpenAI API to generate scripts
     const { text, usage } = await generateText({
       model: openai('gpt-4.1-nano-2025-04-14'),
       prompt,
-      temperature: 0.7,
-      maxTokens: 1000,
+      temperature: 1,
+      maxTokens: 3000,
     });
 
     // Parse the response as JSON

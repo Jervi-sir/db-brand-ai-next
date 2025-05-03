@@ -22,19 +22,20 @@ import DOMPurify from 'dompurify';
 import { useForm } from 'react-hook-form';
 import { cn } from '@/lib/utils';
 import { MinimalTiptapEditor } from '../components/minimal-tiptap';
-import { toast } from '@/components/toast';
+import { toast } from 'sonner';
 import { debounce } from 'lodash';
 
 // TypeScript interfaces
 interface FormData {
   userPrompt: string;
+  topicPrompt?: string;
   content_idea: string;
   hook_type: string;
 }
 
 interface Script {
   subtitle: string;
-  content: string; // Combined script text with all hooks
+  content: string;
 }
 
 interface GenerateScriptsResponse {
@@ -50,10 +51,10 @@ interface GenerateScriptsResponse {
 const maxCharacter = 500;
 
 export default function Page() {
-  // Form setup with react-hook-form
   const form = useForm<FormData>({
     defaultValues: {
       userPrompt: '',
+      topicPrompt: '',
       content_idea: '',
       hook_type: '',
     },
@@ -63,7 +64,7 @@ export default function Page() {
         errors.userPrompt = { message: 'User prompt is required' };
       }
       if (data.userPrompt.length > maxCharacter) {
-        errors.userPrompt = { message: 'User prompt must not exceed ' + maxCharacter + ' characters' };
+        errors.userPrompt = { message: `User prompt must not exceed ${maxCharacter} characters` };
       }
       if (!data.content_idea) {
         errors.content_idea = { message: 'Content idea is required' };
@@ -78,7 +79,6 @@ export default function Page() {
     },
   });
 
-  // State for scripts, title, validation status, and token usage
   const [scripts, setScripts] = useState<Script[]>([]);
   const [scriptTitle, setScriptTitle] = useState<string>('');
   const [validated, setValidated] = useState<boolean[]>([]);
@@ -86,36 +86,46 @@ export default function Page() {
   const [error, setError] = useState<string | null>(null);
   const [tokenUsage, setTokenUsage] = useState<GenerateScriptsResponse['tokenUsage'] | null>(null);
 
-  // Load userPrompt from localStorage on mount
   useEffect(() => {
-    const savedPrompt = localStorage.getItem('userPrompt');
-    if (savedPrompt && savedPrompt.length <= maxCharacter) {
-      form.setValue('userPrompt', savedPrompt);
+    const savedUserPrompt = localStorage.getItem('userPrompt');
+    if (savedUserPrompt && savedUserPrompt.length <= maxCharacter) {
+      form.setValue('userPrompt', savedUserPrompt);
+    }
+    const savedTopicPrompt = localStorage.getItem('topicPrompt');
+    if (savedTopicPrompt && savedTopicPrompt.length <= maxCharacter) {
+      form.setValue('topicPrompt', savedTopicPrompt);
     }
   }, [form]);
 
-  // Debounced function to save userPrompt to localStorage
-  const savePromptToLocalStorage = debounce((prompt: string) => {
+  const saveUserPromptToLocalStorage = debounce((prompt: string) => {
     if (prompt.trim() && prompt.length <= maxCharacter) {
       localStorage.setItem('userPrompt', prompt);
     }
   }, 500);
 
-  // Handle userPrompt changes
-  const handlePromptChange = (value: string) => {
+  const saveTopicPromptToLocalStorage = debounce((prompt: string) => {
+    if (prompt.trim() && prompt.length <= maxCharacter) {
+      localStorage.setItem('topicPrompt', prompt);
+    }
+  }, 500);
+
+  const handleUserPromptChange = (value: string) => {
     form.setValue('userPrompt', value);
-    savePromptToLocalStorage(value);
+    saveUserPromptToLocalStorage(value);
   };
 
-  // Get color for character count based on percentage
+  const handleTopicPromptChange = (value: string) => {
+    form.setValue('topicPrompt', value);
+    saveTopicPromptToLocalStorage(value);
+  };
+
   const getCharCountColor = (length: number) => {
     const percentage = (length / maxCharacter) * 100;
-    if (percentage <= 70) return 'text-green-500'; // 0–210 characters
-    if (percentage <= 90) return 'text-yellow-500'; // 211–270 characters
-    return 'text-red-500'; // 271–maxCharacter characters
+    if (percentage <= 70) return 'text-green-500';
+    if (percentage <= 90) return 'text-yellow-500';
+    return 'text-red-500';
   };
 
-  // Handle form submission
   const onSubmit = async (data: FormData) => {
     setIsLoading(true);
     setError(null);
@@ -124,8 +134,10 @@ export default function Page() {
     setScriptTitle('');
     setTokenUsage(null);
 
-    // Save userPrompt to localStorage on submit
-    savePromptToLocalStorage(data.userPrompt);
+    saveUserPromptToLocalStorage(data.userPrompt);
+    if (data.topicPrompt) {
+      saveTopicPromptToLocalStorage(data.topicPrompt);
+    }
 
     try {
       const response = await fetch('/split/api/generate-scripts', {
@@ -139,14 +151,14 @@ export default function Page() {
       }
 
       const { title, scripts, tokenUsage }: GenerateScriptsResponse = await response.json();
-      setScriptTitle(title);
+      setScriptTitle(title || 'Generated Scripts');
       setScripts(
         scripts.map((script) => ({
           ...script,
           content: DOMPurify.sanitize(script.content),
         }))
       );
-      setValidated(new Array(3).fill(false));
+      setValidated(new Array(scripts.length).fill(false));
       setTokenUsage(tokenUsage);
     } catch (err: any) {
       setError(err.message);
@@ -157,30 +169,42 @@ export default function Page() {
 
   const handleValidate = async (scriptIndex: number) => {
     try {
+      const userPrompt = form.getValues('userPrompt');
+      const mood = form.getValues('hook_type');
+      const topicPrompt = form.getValues('topicPrompt'); // Added
+      const title = scripts[scriptIndex].subtitle;
+      const generatedScript = scripts[scriptIndex].content;
+
+      if (!title || !userPrompt || !mood || !generatedScript) {
+        throw new Error('Missing required fields: title, user prompt, mood, or generated script');
+      }
+
       const response = await fetch('/split/api/save', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          title: scriptTitle,
-          userPrompt: form.getValues('userPrompt'),
-          mood: form.getValues('hook_type'), // Map hook_type to mood
-          generatedScript: scripts[scriptIndex].content, // Save full script
+          title,
+          userPrompt,
+          topicPrompt,
+          mood,
+          generatedScript,
           stage: 'script',
         }),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to save script');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to save script');
       }
 
-      toast({ type: 'success', description: 'Script Validated!' });
+      toast.success('Script Validated!');
       setValidated((prev) => {
         const newValidated = [...prev];
         newValidated[scriptIndex] = true;
         return newValidated;
       });
-    } catch (error) {
-      toast({ type: 'error', description: 'Failed to validate script!' });
+    } catch (error: any) {
+      toast.error(`Failed to validate script: ${error.message}`);
     }
   };
 
@@ -197,7 +221,6 @@ export default function Page() {
           <h2 className="text-2xl font-bold mb-4">Script Generator</h2>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              {/* User Prompt */}
               <FormField
                 control={form.control}
                 name="userPrompt"
@@ -210,7 +233,7 @@ export default function Page() {
                         className="resize-vertical"
                         maxLength={maxCharacter}
                         {...field}
-                        onChange={(e) => handlePromptChange(e.target.value)}
+                        onChange={(e) => handleUserPromptChange(e.target.value)}
                       />
                     </FormControl>
                     <p
@@ -219,16 +242,43 @@ export default function Page() {
                         getCharCountColor(field.value.length)
                       )}
                     >
-                      {field.value.length}/{ maxCharacter }
+                      {field.value.length}/{maxCharacter}
                     </p>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-
-              {/* Content Idea */}
               <FormField
                 control={form.control}
+                name="topicPrompt"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Topic Prompt (Optional)</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Enter a specific topic or theme for the script (e.g., 'Healthy breakfast recipes' or 'Morning routine for productivity')"
+                        className="resize-vertical"
+                        maxLength={maxCharacter}
+                        {...field}
+                        onChange={(e) => handleTopicPromptChange(e.target.value)}
+                      />
+                    </FormControl>
+                    <p
+                      className={cn(
+                        'text-xs mt-1 text-right',
+                        getCharCountColor(field.value?.length || 0)
+                      )}
+                    >
+                      {field.value?.length || 0}/{maxCharacter}
+                    </p>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={
+
+form.control}
                 name="content_idea"
                 render={({ field }) => (
                   <FormItem>
@@ -259,8 +309,6 @@ export default function Page() {
                   </FormItem>
                 )}
               />
-
-              {/* Hook Type */}
               <FormField
                 control={form.control}
                 name="hook_type"
@@ -293,7 +341,6 @@ export default function Page() {
                   </FormItem>
                 )}
               />
-
               <Button type="submit" disabled={isLoading}>
                 {isLoading ? 'Generating...' : 'Generate Scripts'}
               </Button>
@@ -313,19 +360,15 @@ export default function Page() {
             )}
           </div>
         </div>
-
         {/* Scripts (Right Side) */}
         <div className="flex-2 w-full md:w-1/2">
           <h2 className="text-2xl font-bold mb-4">Generated Scripts</h2>
-          {/* {scriptTitle && (
-            <h3 className="text-xl font-semibold mb-2">Main Title: <br /> {scriptTitle}</h3>
-          )} */}
           <div className="space-y-4">
             {isLoading ? (
               <p className="text-gray-500 dark:text-gray-400">Generating scripts...</p>
             ) : scripts.length === 0 ? (
               <p className="text-gray-500 dark:text-gray-400">
-                No scripts generated yet. Fill out the form and click &quot;Generate Scripts&quot;.
+                No scripts generated yet. Fill out the form and click "Generate Scripts".
               </p>
             ) : (
               scripts.map((script, scriptIndex) => (

@@ -260,6 +260,7 @@ export const content = pgTable('Content', {
   userId: uuid('user_id').references(() => user.id).notNull(),
   title: varchar('title', { length: 255 }).notNull(),
   userPrompt: text('userPrompt').notNull(),
+  topicPrompt: text('topicPrompt'), // Added: nullable text column for topicPrompt
   mood: varchar('mood', { length: 50 }).notNull(),
   generatedScript: text('generatedScript').notNull(),
   stage: varchar('stage', { length: 50 }).notNull().default('script'), // script, voice_over, creation, done

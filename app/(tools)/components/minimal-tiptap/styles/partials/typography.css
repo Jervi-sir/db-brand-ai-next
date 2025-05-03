@@ -37,3 +37,16 @@
 .minimal-tiptap-editor .ProseMirror a.link:hover {
   @apply underline;
 }
+
+/* styles/partials/typography.css */
+.minimal-tiptap-editor .ProseMirror [style*="text-align: right"],
+.minimal-tiptap-editor .ProseMirror [style*="text-align:right"] {
+  direction: rtl;
+  text-align: right;
+}
+
+.minimal-tiptap-editor .ProseMirror [style*="text-align: center"],
+.minimal-tiptap-editor .ProseMirror [style*="text-align: justify"],
+.minimal-tiptap-editor .ProseMirror [style*="text-align: left"] {
+  direction: ltr;
+}

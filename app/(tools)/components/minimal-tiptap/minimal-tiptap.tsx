@@ -1,6 +1,6 @@
+// minimal-tiptap.tsx
 import * as React from "react";
 import "./styles/index.css";
-
 import type { Content, Editor } from "@tiptap/react";
 import type { UseMinimalTiptapEditorProps } from "./hooks/use-minimal-tiptap";
 import { EditorContent } from "@tiptap/react";
@@ -11,12 +11,12 @@ import { SectionTwo } from "./components/section/two";
 import { SectionThree } from "./components/section/three";
 import { SectionFour } from "./components/section/four";
 import { SectionFive } from "./components/section/five";
+import { SectionSix } from "./components/section/six"; // Add this import
 import { LinkBubbleMenu } from "./components/bubble-menu/link-bubble-menu";
 import { useMinimalTiptapEditor } from "./hooks/use-minimal-tiptap";
 import { MeasuredContainer } from "./components/measured-container";
-import { Button } from "@/components/ui/button"; // Import Button component
-import { ArrowLeft, ArrowRight, Redo2, Undo, Undo2 } from "lucide-react"; // Import icons (optional)
 import { Badge } from "@/components/ui/badge";
+import { Redo2, Undo2 } from "lucide-react";
 
 export interface MinimalTiptapProps
   extends Omit<UseMinimalTiptapEditorProps, "onUpdate"> {
@@ -32,14 +32,14 @@ const Toolbar = ({ editor }: { editor: Editor }) => (
       {/* History Section: Undo and Redo Buttons */}
       <div className="flex items-center gap-1">
         <Badge
-          variant='secondary'
+          variant="secondary"
           onClick={() => editor.can().undo() && editor.chain().focus().undo().run()}
           title="Undo"
         >
           <Undo2 className="size-4" />
         </Badge>
         <Badge
-          variant='secondary'
+          variant="secondary"
           onClick={() => editor.can().redo() && editor.chain().focus().redo().run()}
           title="Redo"
         >
@@ -75,6 +75,12 @@ const Toolbar = ({ editor }: { editor: Editor }) => (
         activeActions={["codeBlock", "blockquote", "horizontalRule"]}
         mainActionCount={0}
       />
+      <Separator orientation="vertical" className="mx-2 h-7" />
+      <SectionSix
+        editor={editor}
+        activeActions={["left", "center", "right", "justify"]}
+        mainActionCount={4}
+      />
     </div>
   </div>
 );
@@ -98,6 +104,7 @@ export const MinimalTiptapEditor = React.forwardRef<
       as="div"
       name="editor"
       ref={ref}
+      // dir={"rtl"}
       className={cn(
         "flex h-auto min-h-72 w-full flex-col rounded-md border border-input shadow-sm focus-within:border-primary",
         className
