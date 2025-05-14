@@ -7,6 +7,8 @@ import { hookTypePrompts } from '../../variables/hook-type-prompts';
 import { PromptGenerator } from '../../prompts/generator';
 import { API_CONFIG, CONTENT_IDEAS, HOOK_TYPES } from '../../config';
 import { GenerateScriptsRequest, GenerateScriptsResponse } from '../../type';
+import { db } from '@/lib/db/queries';
+import { scriptHistory } from '@/lib/db/schema';
 
 export async function POST(request: Request) {
   try {
@@ -71,6 +73,27 @@ export async function POST(request: Request) {
       if (!script.content.trim()) {
         return NextResponse.json({ error: 'Invalid script content: empty content' }, { status: 500 });
       }
+    }
+
+    try {
+      // Save to scriptHistory table
+      await db.insert(scriptHistory).values({
+        userId: session.user.id,
+        contentId: null, // Set to a Content ID if linked, otherwise null
+        userPrompt,
+        topicPrompt,
+        contentIdea: content_idea,
+        hookType: hook_type,
+        generatedScripts: responseOfGeneratedText.scripts,
+        usedModelId: response.modelId,
+        tokenUsage: {
+          prompt_tokens: usage?.promptTokens || 0,
+          completion_tokens: usage?.completionTokens || 0,
+          total_tokens: usage?.totalTokens || 0,
+        },
+      });
+    } catch (error) {
+      console.error('could not save the history script')
     }
 
     return NextResponse.json({

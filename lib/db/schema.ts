@@ -1,5 +1,5 @@
 import { relations, type InferSelectModel } from 'drizzle-orm';
-import { pgTable, varchar, timestamp, json, uuid, text, primaryKey, foreignKey, boolean, integer, real, decimal, index, } from 'drizzle-orm/pg-core';
+import { pgTable, varchar, timestamp, json, uuid, text, primaryKey, foreignKey, boolean, integer, real, decimal, index, jsonb, } from 'drizzle-orm/pg-core';
 
 export const user = pgTable('User', {
   id: uuid('id').primaryKey().notNull().defaultRandom(),
@@ -276,3 +276,24 @@ export const content = pgTable('Content', {
   deadlineIdx: index('idx_content_stage_deadline').on(table.stage, table.deadline), // Optional
 })
 );
+export const scriptHistory = pgTable(
+  'ScriptHistory',
+  {
+    id: uuid('id').primaryKey().notNull().defaultRandom(),
+    userId: uuid('user_id').references(() => user.id).notNull(),
+    contentId: uuid('content_id').references(() => content.id), // Nullable, as history might not always tie to a Content record
+    userPrompt: text('user_prompt').notNull(),
+    topicPrompt: text('topic_prompt'), // Nullable, as in your Content table
+    contentIdea: varchar('content_idea', { length: 255 }).notNull(),
+    hookType: varchar('hook_type', { length: 255 }).notNull(),
+    generatedScripts: jsonb('generated_scripts').notNull(), // Store the array of scripts as JSONB
+    usedModelId: varchar('used_model_id', { length: 255 }), // Store the AI model ID used
+    tokenUsage: jsonb('token_usage'), // Store token usage details (prompt_tokens, completion_tokens, total_tokens)
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+  },
+  (table) => ({
+    userIdx: index('idx_script_history_user_id').on(table.userId),
+    createdAtIdx: index('idx_script_history_created_at').on(table.createdAt),
+  })
+);
+
