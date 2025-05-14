@@ -2,18 +2,18 @@ import type { Metadata } from 'next';
 import { Toaster } from 'sonner';
 
 import { ThemeProvider } from '@/components/theme-provider';
-import { Beiruti,Inter } from 'next/font/google'
+// import { Inter } from 'next/font/google'
 
 // If loading a variable font, you don't need to specify the font weight
-const inter = Inter({
-  subsets: ['latin'],
-  display: 'swap',
-})
+// const inter = Inter({
+//   subsets: ['latin'],
+//   display: 'swap',
+// })
 
-const beiruti = Beiruti({
-  weight: ['200', '300', '400', '500', '600', '700', '800', '900' ],
-  subsets: ['arabic', 'latin'],
-})
+// const beiruti = Beiruti({
+//   weight: ['200', '300', '400', '500', '600', '700', '800', '900' ],
+//   subsets: ['arabic', 'latin'],
+// })
 
 import './globals.css';
 
@@ -38,7 +38,7 @@ export default async function RootLayout({
   return (
     <html
       lang="en"
-      className={inter.className}
+      // className={inter.className}
       suppressHydrationWarning
     >
       <head>
