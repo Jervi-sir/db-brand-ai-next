@@ -23,5 +23,15 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/', '/login', '/register', '/api/auth'], // '/:id', '/api/:path*', 
+  matcher: ['/', 
+    '/login', 
+    '/register', 
+    '/api/auth', 
+    '/split',
+    '/split-v2',
+    '/todo-list',
+    '/calendar',
+    '/kanban',
+
+  ], // '/:id', '/api/:path*', 
 };

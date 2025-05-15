@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { useMemo, useState } from 'react';
 import { MinimalTiptapEditor } from '../components/minimal-tiptap';
 import { ScriptGeneratorProvider, useScriptGenerator } from './script-generator-context';
+import { Separator } from '@/components/ui/separator';
 
 const ITEMS_PER_PAGE = 5;
 
@@ -52,8 +53,8 @@ function PageContent() {
               </p>
             ) : (
               paginatedScripts.map((script, index) => (
-                <div key={index} className="border rounded-xl p-4 dark:border-zinc-800">
-                  <h3 className="text-xl font-semibold mb-2">{script.subtitle}</h3>
+                <div key={index} className="border rounded-xl dark:border-zinc-800">
+                  <h3 className="text-xl font-semibold text-right text-wrap pb-2 pt-4 px-5">{script.subtitle}</h3>
                   <MinimalTiptapEditor
                     value={script.content}
                     onChange={(value) =>
@@ -72,7 +73,7 @@ function PageContent() {
                     editable={true}
                     editorClassName="focus:outline-none px-5 py-4 h-full"
                   />
-                  <div className="mt-2 flex gap-2">
+                  <div className="p-2 flex gap-2">
                     <Button
                       variant="outline"
                       onClick={() => validateScript((currentPage - 1) * ITEMS_PER_PAGE + index, historyId)}

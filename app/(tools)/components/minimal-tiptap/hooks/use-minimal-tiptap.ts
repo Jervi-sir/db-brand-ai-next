@@ -136,10 +136,10 @@ const createExtensions = (placeholder: string) => [
   ResetMarksOnEnter,
   CodeBlockLowlight,
   Placeholder.configure({ placeholder: () => placeholder }),
-  TextAlign.configure({
-    types: ["heading", "paragraph", "image"], // Apply to headings, paragraphs, and images
+  TextAlign.configure({ 
+    types: ["heading", "paragraph"], // Apply to headings, paragraphs, and images , "image"
     alignments: ["left", "center", "right", "justify"], // Include 'right' for RTL
-    defaultAlignment: "left",
+    defaultAlignment: "right",
   }),
 ];
 
