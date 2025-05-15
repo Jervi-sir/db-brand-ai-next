@@ -1,0 +1,1 @@
+ALTER TABLE "Content" ALTER COLUMN "mood" SET DATA TYPE varchar;

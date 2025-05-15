@@ -1,13 +1,14 @@
-// app/form-1.tsx
 'use client';
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Textarea } from '@/components/ui/textarea';
 import { useForm } from 'react-hook-form';
 import { debounce } from 'lodash';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import { History } from 'lucide-react';
 import { useScriptGenerator } from './script-generator-context';
+import { PromptHistoryDialog } from './prompt-history-dialog';
 
 interface FormData {
   userPrompt: string;
@@ -16,25 +17,37 @@ interface FormData {
 export const Form1 = () => {
   const maxCharacter = 500;
   const { userPrompt, setUserPrompt, generateSubPillars, isLoadingSubPillars } = useScriptGenerator();
+  const [historyOpen, setHistoryOpen] = useState(false);
   const form = useForm<FormData>({
-    defaultValues: {
-      userPrompt,
-    },
+    defaultValues: { userPrompt },
     resolver: async (data) => {
       const errors: Partial<Record<keyof FormData, { message: string }>> = {};
       if (!data.userPrompt.trim()) {
-        errors.userPrompt = { message: 'User prompt is required' };
+        errors.userPrompt = { message: 'Prompt is required' };
       }
-      return {
-        values: data,
-        errors,
-      };
+      return { values: data, errors };
     },
   });
+
+  // Load saved prompt from localStorage on mount
+  useEffect(() => {
+    const savedPrompt = localStorage.getItem('userPrompt');
+    if (savedPrompt && !userPrompt) {
+      setUserPrompt(savedPrompt);
+      form.setValue('userPrompt', savedPrompt);
+    }
+  }, [form, setUserPrompt]);
+
+  // Update form value when userPrompt changes (e.g., from history selection)
+  useEffect(() => {
+    form.setValue('userPrompt', userPrompt);
+  }, [userPrompt, form]);
 
   const saveUserPromptToLocalStorage = debounce((prompt: string) => {
     if (prompt.trim() && prompt.length <= maxCharacter) {
       localStorage.setItem('userPrompt', prompt);
+    } else if (!prompt.trim()) {
+      localStorage.removeItem('userPrompt'); // Clear if empty
     }
   }, 1000);
 
@@ -57,22 +70,34 @@ export const Form1 = () => {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-1">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <FormField
           control={form.control}
           name="userPrompt"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Your Prompt</FormLabel>
+              <div className="flex justify-between items-center">
+                <FormLabel>Your Prompt</FormLabel>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setHistoryOpen(true)}
+                >
+                  <History className="h-4 w-4 mr-2" />
+                  View History
+                </Button>
+              </div>
               <FormControl>
                 <Textarea
-                  placeholder="Include: Niche (e.g., cooking), Short intro (e.g., I'm ..., an Algerian chef), Product/Service (e.g., recipe book), Target audience, Best-performing content (optional, e.g., couscous video got 100K views)"
+                  placeholder="Specify: Niche (e.g., cooking), short intro (e.g., I'm an Algerian chef), product/service (e.g., recipe book), target audience, best-performing content (optional)"
                   className="resize-vertical"
                   maxLength={maxCharacter}
                   {...field}
                   onChange={(e) => handleUserPromptChange(e.target.value)}
                 />
               </FormControl>
+              <FormMessage />
             </FormItem>
           )}
         />
@@ -81,13 +106,13 @@ export const Form1 = () => {
             <p className={cn('text-xs mt-1 text-right', getCharCountColor(userPrompt.length))}>
               {userPrompt.length}/{maxCharacter}
             </p>
-            <FormMessage />
           </div>
           <Button type="submit" disabled={isLoadingSubPillars}>
             {isLoadingSubPillars ? 'Generating...' : 'Generate Sub-Pillars'}
           </Button>
         </div>
       </form>
+      <PromptHistoryDialog open={historyOpen} setOpen={setHistoryOpen} />
     </Form>
   );
 };

@@ -263,7 +263,7 @@ export const content = pgTable('Content', {
   topicPrompt: text('topicPrompt'), // Added: nullable text column for topicPrompt
   content_idea: varchar('content_idea'),
   hook_type: varchar('hook_type'),
-  mood: varchar('mood', { length: 50 }).notNull(),
+  mood: varchar('mood').notNull(),
   generatedScript: text('generatedScript').notNull(),
   stage: varchar('stage', { length: 50 }).notNull().default('script'), // script, voice_over, creation, done
   scheduledDate: timestamp('scheduledDate'),
@@ -296,4 +296,17 @@ export const scriptHistory = pgTable(
     createdAtIdx: index('idx_script_history_created_at').on(table.createdAt),
   })
 );
+export const generatedSplitHistory = pgTable('GeneratedSplitHistory', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: uuid('user_id').references(() => user.id).notNull(),
+  prompt: text('prompt').notNull(),
+  clientPersona: text('client_persona').notNull(),
+  contentPillar: text('content_pillar').notNull(),
+  subPillars: jsonb('sub_pillars').notNull().default([]),
+  chosenSubPillars: jsonb('chosen_sub_pillars').notNull().default([]),
+  hookType: jsonb('hook_type').notNull().default([]),
+  scripts: jsonb('scripts').notNull().default([]),
+  timestamp: timestamp('timestamp').notNull().defaultNow(),
+  isDeleted: boolean('is_deleted').notNull().default(false),
+});
 

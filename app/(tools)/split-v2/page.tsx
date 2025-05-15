@@ -1,4 +1,4 @@
-// app/page.tsx
+// app/(tools)/split-v2/page.tsx
 'use client';
 import { cn } from '@/lib/utils';
 import { Form1 } from './form-1';
@@ -15,9 +15,10 @@ function PageContent() {
     scripts,
     isLoadingScripts,
     validated,
-    handleValidate,
+    validateScript,
     handleDelete,
     setScripts,
+    historyId,
   } = useScriptGenerator();
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -47,7 +48,7 @@ function PageContent() {
               <p className="text-gray-500 dark:text-gray-400">Generating scripts...</p>
             ) : scripts.length === 0 ? (
               <p className="text-gray-500 dark:text-gray-400">
-                No scripts generated yet. Fill out the form and click "Generate Scripts".
+                No scripts generated yet. Fill out the form and click &quot;Generate Scripts&quot;.
               </p>
             ) : (
               paginatedScripts.map((script, index) => (
@@ -56,11 +57,12 @@ function PageContent() {
                   <MinimalTiptapEditor
                     value={script.content}
                     onChange={(value) =>
+                      // @ts-ignore
                       setScripts((prev) => {
                         const newScripts = [...prev];
                         newScripts[(currentPage - 1) * ITEMS_PER_PAGE + index].content = value;
                         return newScripts;
-                      }) as any
+                      })
                     }
                     throttleDelay={2000}
                     className={cn('h-full min-h-[150px] w-full rounded-xl border-0')}
@@ -73,7 +75,7 @@ function PageContent() {
                   <div className="mt-2 flex gap-2">
                     <Button
                       variant="outline"
-                      onClick={() => handleValidate((currentPage - 1) * ITEMS_PER_PAGE + index)}
+                      onClick={() => validateScript((currentPage - 1) * ITEMS_PER_PAGE + index, historyId)}
                       disabled={validated[(currentPage - 1) * ITEMS_PER_PAGE + index]}
                     >
                       {validated[(currentPage - 1) * ITEMS_PER_PAGE + index] ? 'Validated' : 'Validate'}

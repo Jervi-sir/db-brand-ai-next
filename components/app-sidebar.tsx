@@ -75,19 +75,17 @@ export function AppSidebar({ user }: { user: ExtendedUser | undefined }) {
             <SidebarGroupContent>
               {[
                 { name: 'Split', icon: <SplitSquareHorizontalIcon />, url: '/split' },
+                { name: 'Split v2', icon: <SplitSquareHorizontalIcon />, url: '/split-v2' },
                 { name: 'Kanban', icon: <KanbanSquareIcon />, url: '/kanban' },
                 { name: 'Calendar', icon: <CalendarIcon />, url: '/calendar' },
                 { name: 'Todo List', icon: <ListIcon />, url: '/todo-list' },
               ].map((item, index) => {
-                // Get the base path segment (e.g., "kanban" or "calendar")
-                const pathSegment = item.url.split('/').filter(Boolean)[0];
-
-                // Check if current pathname starts with this path segment
-                const isActive = pathname.startsWith(`/${pathSegment}`);
+                // Check if the pathname exactly matches the item.url or starts with the url followed by a slash
+                const isActive = pathname === item.url || pathname.startsWith(`${item.url}/`);
 
                 return (
                   <React.Fragment key={index}>
-                    <SidebarMenuButton asChild isActive={isActive}>
+                    <SidebarMenuButton asChild isActive={isActive} className='mb-1'>
                       <Link href={item.url} onClick={() => setOpenMobile(false)}>
                         {item.icon}
                         <span>{item.name}</span>
