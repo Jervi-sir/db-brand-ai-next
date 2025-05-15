@@ -47,7 +47,7 @@ export function PromptHistoryDialog({ open, setOpen }: PromptHistoryDialogProps)
                       setOpen(false);
                     }}
                   >
-                    <p className="text-sm truncate">{entry.prompt}</p>
+                    <p className="text-sm text-wrap truncate">{entry.prompt}</p>
                     {entry.clientPersona && (
                       <p className="text-xs text-gray-500">Persona: {entry.clientPersona}</p>
                     )}
