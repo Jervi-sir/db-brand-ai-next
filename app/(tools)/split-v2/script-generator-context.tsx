@@ -35,7 +35,7 @@ interface ScriptGeneratorContextType {
   isLoadingScripts: boolean;
   validated: boolean[];
   setValidated: (validated: boolean[]) => void;
-  generateSubPillars: () => Promise<void>;
+  generateSubPillars: (isAutomatic: boolean) => Promise<void>;
   generateScripts: () => Promise<void>;
   validateScript: (scriptIndex: number, historyId: string) => Promise<void>;
   handleDelete: (scriptIndex: number) => void;
@@ -45,6 +45,8 @@ interface ScriptGeneratorContextType {
   loadPromptHistory: () => Promise<void>;
   historyId: string;
   setHistoryId: (id: string) => void;
+  mode: 'automatic' | 'custom';
+  setMode: (mode: 'automatic' | 'custom') => void;
 }
 
 const ScriptGeneratorContext = createContext<ScriptGeneratorContextType | undefined>(undefined);
@@ -62,6 +64,7 @@ export const ScriptGeneratorProvider: React.FC<{ children: React.ReactNode }> = 
   const [validated, setValidated] = useState<boolean[]>([]);
   const [promptHistory, setPromptHistory] = useState<PromptHistoryEntry[]>([]);
   const [historyId, setHistoryId] = useState<string>('');
+  const [mode, setMode] = useState<'automatic' | 'custom'>('automatic');
 
   const loadPromptHistory = useCallback(async () => {
     try {
@@ -110,55 +113,99 @@ export const ScriptGeneratorProvider: React.FC<{ children: React.ReactNode }> = 
     setContentPillar(entry.contentPillar);
     setClientPersona(entry.clientPersona);
     setSubPillars(entry.subPillars);
-    // setSelectedSubPillars(
-    //   entry.chosenSubPillars
-    //     .map((label) => {
-    //       const subPillar = entry.subPillars.find((sp) => sp.label === label);
-    //       return subPillar ? subPillar.value : '';
-    //     })
-    //     .filter(Boolean)
-    // );
-    // setHookType(entry.hookType);
-    // setScripts(entry.scripts);
+    setMode('custom'); // Set to custom mode when selecting from history
     setValidated(new Array(entry.scripts.length).fill(false));
     setHistoryId(entry.id);
   }, []);
 
-  const generateSubPillars = useCallback(async () => {
-    if (!userPrompt.trim()) {
-      toast({ type: 'error', description: 'Prompt is required' });
-      return;
-    }
-    setIsLoadingSubPillars(true);
-    try {
-      const response = await fetch('/split-v2/api/generate-sub-pillars', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userPrompt }),
-      });
-      if (!response.ok) {
-        throw new Error('Failed to generate sub-pillars');
+  const generateSubPillars = useCallback(
+    async (isAutomatic: boolean) => {
+      if (!userPrompt.trim()) {
+        toast({ type: 'error', description: 'Prompt is required' });
+        return;
       }
-      const data = await response.json();
-      setContentPillar(data.contentPillar);
-      setClientPersona(data.clientPersona);
-      setSubPillars(data.subPillars);
-      setSelectedSubPillars([]);
-      if (data.subPillars.length < 25) {
-        toast({
-          type: 'error',
-          description: `Generated ${data.subPillars.length} sub-pillars instead of 25.`,
+      setIsLoadingSubPillars(true);
+      try {
+        const response = await fetch('/split-v2/api/generate-sub-pillars', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userPrompt }),
         });
-      } else {
-        toast({ type: 'success', description: 'Sub-pillars generated successfully' });
+        if (!response.ok) {
+          throw new Error('Failed to generate sub-pillars');
+        }
+        const data = await response.json();
+        setContentPillar(data.contentPillar);
+        setClientPersona(data.clientPersona);
+        setSubPillars(data.subPillars);
+        setSelectedSubPillars([]);
+
+        if (isAutomatic) {
+          // For automatic mode, select first 5 sub-pillars and generate scripts
+          const selected = data.subPillars.slice(0, 5).map((sp: { value: string }) => sp.value);
+          setSelectedSubPillars(selected);
+          setHookType([
+            'fix-a-problem',
+            'quick-wins',
+            'reactions-reviews',
+            'personal-advice',
+            'step-by-step-guides',
+            'curiosity-surprises',
+            'direct-targeting',
+          ]); // Use all hook types
+          // Trigger automatic script generation
+          await fetch('/split-v2/api/generate-automatic-scripts', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              userPrompt,
+              clientPersona: data.clientPersona,
+              contentPillar: data.contentPillar,
+              subPillars: data.subPillars,
+              chosenSubPillars: selected.map(
+                (value: string) => data.subPillars.find((sp: { value: string }) => sp.value === value)?.label || value
+              ),
+              hookType: [
+                'fix-a-problem',
+                'quick-wins',
+                'reactions-reviews',
+                'personal-advice',
+                'step-by-step-guides',
+                'curiosity-surprises',
+                'direct-targeting',
+              ],
+            }),
+          }).then(async (response) => {
+            if (!response.ok) {
+              const errorData = await response.json();
+              throw new Error(errorData.error || 'Failed to generate scripts');
+            }
+            const scriptData = await response.json();
+            setScripts(scriptData.scripts);
+            setValidated(new Array(scriptData.scripts.length).fill(false));
+            setHistoryId(scriptData.historyId);
+            await loadPromptHistory();
+            toast({ type: 'success', description: 'Scripts generated successfully' });
+          });
+        } else {
+          if (data.subPillars.length < 25) {
+            toast({
+              type: 'error',
+              description: `Generated ${data.subPillars.length} sub-pillars instead of 25.`,
+            });
+          } else {
+            toast({ type: 'success', description: 'Sub-pillars generated successfully' });
+          }
+        }
+      } catch (error) {
+        console.error('Error generating sub-pillars:', error);
+        toast({ type: 'error', description: 'Failed to generate sub-pillars' });
+      } finally {
+        setIsLoadingSubPillars(false);
       }
-    } catch (error) {
-      console.error('Error generating sub-pillars:', error);
-      toast({ type: 'error', description: 'Failed to generate sub-pillars' });
-    } finally {
-      setIsLoadingSubPillars(false);
-    }
-  }, [userPrompt]);
+    },
+    [userPrompt, loadPromptHistory]
+  );
 
   const generateScripts = useCallback(async () => {
     if (!userPrompt.trim()) {
@@ -228,7 +275,6 @@ export const ScriptGeneratorProvider: React.FC<{ children: React.ReactNode }> = 
       }
 
       try {
-        // Step 1: Validate the script
         const validateResponse = await fetch('/split-v2/api/validate-script', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -253,7 +299,6 @@ export const ScriptGeneratorProvider: React.FC<{ children: React.ReactNode }> = 
 
         const validateData = await validateResponse.json();
 
-        // Update state for validation
         setScripts((prev) => {
           const newScripts = [...prev];
           newScripts[scriptIndex] = { ...newScripts[scriptIndex], isValidated: true };
@@ -267,9 +312,8 @@ export const ScriptGeneratorProvider: React.FC<{ children: React.ReactNode }> = 
 
         toast({
           type: 'success',
-          description: `Script "${scripts[scriptIndex].subtitle}" validated and saved successfully)`,
+          description: `Script "${scripts[scriptIndex].subtitle}" validated and saved successfully`,
         });
-
       } catch (error: any) {
         console.error('Error validating/saving script:', error);
         toast({ type: 'error', description: `Failed to validate/save script: ${error.message}` });
@@ -314,6 +358,8 @@ export const ScriptGeneratorProvider: React.FC<{ children: React.ReactNode }> = 
         loadPromptHistory,
         historyId,
         setHistoryId,
+        mode,
+        setMode,
       }}
     >
       {children}

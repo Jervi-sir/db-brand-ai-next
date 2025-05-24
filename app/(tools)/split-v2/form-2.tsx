@@ -1,3 +1,4 @@
+// app/(tools)/split-v2/form-2.tsx
 'use client';
 import React from 'react';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -34,7 +35,13 @@ export const Form2 = () => {
     userPrompt,
     clientPersona,
     contentPillar,
+    mode,
   } = useScriptGenerator();
+
+  // Hide form in automatic mode
+  if (mode === 'automatic') {
+    return null;
+  }
 
   const form = useForm<FormData>({
     defaultValues: {
@@ -53,7 +60,6 @@ export const Form2 = () => {
     },
   });
 
-  // Check if form should be disabled
   const isFormDisabled = subPillars.length === 0 || selectedSubPillars.length === 0;
 
   const onSubmit = async () => {

@@ -88,7 +88,7 @@ https://github.com/Jervi-sir/big-calendar-offf-full
   "msDuration": 1670055,
   "duration": "27m"
 },
-``` 2025, April 22nd
+``` 2025, May 24th
  "dr-brand-ai": {
     "msDuration": 94076990,
     "duration": "26h 7m"
@@ -96,10 +96,11 @@ https://github.com/Jervi-sir/big-calendar-offf-full
     "db-brand-ai-next": {
     "msDuration": 43623436,
     "duration": "12h 7m",
-    "duration": "24h 50m"
+    "duration": "24h 50m",  2025, April 22nd
+    "duration": "6h 20m"    2025, May 24th
   },
 
 =====================================
-Total = 12h 14m + 49m + 39m + 13h 8m + 27m + 26h 7m + 24h 50m
-      = 75h
+Total = 12h 14m + 49m + 39m + 13h 8m + 27m + 26h 7m + 24h 50m + 6h 20m
+      = 82h
 =====================================

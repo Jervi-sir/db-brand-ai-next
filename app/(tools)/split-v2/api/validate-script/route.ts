@@ -10,8 +10,8 @@ interface SaveScriptRequest {
   contentPillar?: string;
   historyId?: string;
   hookType?: string;
-  script: { subtitle: string, content: string };
-  subPillars?: string;
+  script: { subtitle: string; content: string };
+  subPillars?: { value: string; label: string }[];
   userPrompt?: string;
 }
 
@@ -33,7 +33,6 @@ export async function POST(request: Request) {
       userPrompt = 'script',
     } = await request.json() as SaveScriptRequest;
 
-
     // Insert into Content table
     const [savedContent] = await db
       .insert(content)
@@ -43,7 +42,7 @@ export async function POST(request: Request) {
         generatedScript: script.content,
         userPrompt: userPrompt,
         content_idea: chosenSubPillars.join(', '),
-        hook_type: hookType,
+        hook_type: hookType || 'unknown', // Fallback for hookType
         mood: chosenSubPillars.join(', '),
         createdAt: new Date(),
         updatedAt: new Date(),

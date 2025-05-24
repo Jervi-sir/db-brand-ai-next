@@ -1,192 +1,72 @@
 {
-  "wajed_app_": {
-    "msDuration": 7599508,
-    "duration": "2h 6m"
-  },
-  "dr-ai": {
-    "msDuration": 44072304,
-    "duration": "12h 14m"
-  },
-  "wajed_app_web": {
-    "msDuration": 3264180,
-    "duration": "54m"
-  },
-  "sim-charge-guardian": {
-    "msDuration": 123975,
-    "duration": "2m"
-  },
-  "dr-brand-ai-laravel": {
-    "msDuration": 2976131,
-    "duration": "49m"
-  },
-  "dr-ai-next": {
-    "msDuration": 2397876,
-    "duration": "39m"
-  },
-  "nextjs-typescript-starter": {
-    "msDuration": 238760,
-    "duration": "3m"
-  },
-  "iptv": {
-    "msDuration": 12722568,
-    "duration": "3h 32m"
-  },
-  "dr-brand-ai": {
-    "msDuration": 94076990,
-    "duration": "26h 7m"
-  },
-  "ai-chatbot": {
-    "msDuration": 1670055,
-    "duration": "27m"
-  },
-  "op_app": {
-    "msDuration": 3270820,
-    "duration": "54m"
-  },
-  "op_coming_soon": {
-    "msDuration": 574036,
-    "duration": "9m"
-  },
-  "op_coming_soon_1": {
-    "msDuration": 6050,
-    "duration": "0m"
-  },
-  "stream_pack": {
-    "msDuration": 3389896,
-    "duration": "56m"
-  },
-  "drainer-react": {
-    "msDuration": 1110439,
-    "duration": "18m"
-  },
-  "invoice": {
-    "msDuration": 9484265,
-    "duration": "2h 38m"
-  },
-  "site2": {
-    "msDuration": 1094042,
-    "duration": "18m"
-  },
-  "site1": {
-    "msDuration": 72310,
-    "duration": "1m"
-  },
-  "original": {
-    "msDuration": 19202177,
-    "duration": "5h 20m"
-  },
-  "drain": {
-    "msDuration": 1943951,
-    "duration": "32m"
-  },
-  "DrainerLess-backend": {
-    "msDuration": 1288664,
-    "duration": "21m"
-  },
-  "wallet-drainer-kit": {
-    "msDuration": 657220,
-    "duration": "10m"
-  },
-  "Drainer": {
-    "msDuration": 238636,
-    "duration": "3m"
-  },
-  "Wallet-drainer": {
-    "msDuration": 5658758,
-    "duration": "1h 34m"
-  },
-  "new": {
-    "msDuration": 286277,
+  "andrewsam.xyz": {
+    "msDuration": 270720,
     "duration": "4m"
   },
-  "bnb-airdrop-drainer": {
-    "msDuration": 101965,
+  "onur.dev": {
+    "msDuration": 1250773,
+    "duration": "20m"
+  },
+  "Desktop": {
+    "msDuration": 68425,
     "duration": "1m"
   },
-  "Drainer-Permit-USDC-example": {
-    "msDuration": 206352,
-    "duration": "3m"
-  },
-  "drainer_safeguard_bot": {
-    "msDuration": 9257,
-    "duration": "0m"
-  },
-  "Frontend": {
-    "msDuration": 518978,
-    "duration": "8m"
-  },
-  "my-rainbowkit-app": {
-    "msDuration": 129986,
-    "duration": "2m"
-  },
-  "grok-drainer-phantom": {
-    "msDuration": 546990,
-    "duration": "9m"
-  },
-  "drainer-react-2": {
-    "msDuration": 95740,
-    "duration": "1m"
-  },
-  "drainer-react-3": {
-    "msDuration": 262787,
-    "duration": "4m"
-  },
-  "stream-sizzle-sell-smart": {
-    "msDuration": 220153,
-    "duration": "3m"
-  },
-  "wajed_api": {
-    "msDuration": 1845576,
-    "duration": "30m"
-  },
-  "op_app_2.8": {
-    "msDuration": 246804971,
-    "duration": "68h 33m"
-  },
-  "ai prompts": {
-    "msDuration": 275304,
-    "duration": "4m"
-  },
-  "op_app_2.8_router": {
-    "msDuration": 4292418,
-    "duration": "1h 11m"
-  },
-  "docsexpo": {
-    "msDuration": 279469,
-    "duration": "4m"
-  },
-  "octa_api_": {
-    "msDuration": 77842080,
-    "duration": "21h 37m"
-  },
-  "big-calendar-offf-full": {
-    "msDuration": 124859,
-    "duration": "2m"
-  },
-  "react-dnd-kit-tailwind-shadcn-ui": {
-    "msDuration": 94815,
-    "duration": "1m"
-  },
-  "server": {
-    "msDuration": 71235,
-    "duration": "1m"
-  },
-  "iptv-sales-page": {
-    "msDuration": 5853248,
+  "iptv-site-1": {
+    "msDuration": 5871012,
     "duration": "1h 37m"
   },
-  "streaming_saas": {
-    "msDuration": 2629332,
-    "duration": "43m"
+  "iptv-site-2": {
+    "msDuration": 4891880,
+    "duration": "1h 21m"
+  },
+  "facelessniches_laravel": {
+    "msDuration": 592935,
+    "duration": "9m"
+  },
+  "fn_laravel": {
+    "msDuration": 46831364,
+    "duration": "13h"
+  },
+  "scheduler": {
+    "msDuration": 1630487,
+    "duration": "27m"
   },
   "db-brand-ai-next": {
-    "msDuration": 89416672,
-    "duration": "24h 50m"
+    "msDuration": 10523871,
+    "duration": "2h 55m"
   },
-  "shadcn-minimal-tiptap": {
-    "msDuration": 732246,
-    "duration": "12m"
+  "server": {
+    "msDuration": 3030979,
+    "duration": "50m"
   },
-  "startDate": "2025-04-07T14:12:25.585Z",
-  "endDate": "2025-04-27T03:28:50.287Z"
+  "octa_api_": {
+    "msDuration": 1637382,
+    "duration": "27m"
+  },
+  "popup extension": {
+    "msDuration": 302349,
+    "duration": "5m"
+  },
+  "password-storage": {
+    "msDuration": 785817,
+    "duration": "13m"
+  },
+  "cloudini": {
+    "msDuration": 3096167,
+    "duration": "51m"
+  },
+  "ai-social-media-script-generator": {
+    "msDuration": 3328125,
+    "duration": "55m"
+  },
+  "ai-script-generator": {
+    "msDuration": 4117714,
+    "duration": "1h 8m"
+  },
+  "pssd-strg": {
+    "msDuration": 1793283,
+    "duration": "29m"
+  },
+  "startDate": "2025-05-06T17:27:37.028Z",
+  "endDate": "2025-05-24T09:47:44.831Z"
 }

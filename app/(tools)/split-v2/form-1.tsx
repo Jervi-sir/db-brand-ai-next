@@ -1,3 +1,4 @@
+// app/(tools)/split-v2/form-1.tsx
 'use client';
 import React, { useState, useEffect } from 'react';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -9,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { History } from 'lucide-react';
 import { useScriptGenerator } from './script-generator-context';
 import { PromptHistoryDialog } from './prompt-history-dialog';
+import { Switch } from '@/components/ui/switch'; // Import Switch component
 
 interface FormData {
   userPrompt: string;
@@ -16,7 +18,14 @@ interface FormData {
 
 export const Form1 = () => {
   const maxCharacter = 500;
-  const { userPrompt, setUserPrompt, generateSubPillars, isLoadingSubPillars } = useScriptGenerator();
+  const {
+    userPrompt,
+    setUserPrompt,
+    generateSubPillars,
+    isLoadingSubPillars,
+    mode,
+    setMode, // Add mode and setMode from context
+  } = useScriptGenerator();
   const [historyOpen, setHistoryOpen] = useState(false);
   const form = useForm<FormData>({
     defaultValues: { userPrompt },
@@ -29,7 +38,6 @@ export const Form1 = () => {
     },
   });
 
-  // Load saved prompt from localStorage on mount
   useEffect(() => {
     const savedPrompt = localStorage.getItem('userPrompt');
     if (savedPrompt && !userPrompt) {
@@ -38,7 +46,6 @@ export const Form1 = () => {
     }
   }, [form, setUserPrompt]);
 
-  // Update form value when userPrompt changes (e.g., from history selection)
   useEffect(() => {
     form.setValue('userPrompt', userPrompt);
   }, [userPrompt, form]);
@@ -47,7 +54,7 @@ export const Form1 = () => {
     if (prompt.trim() && prompt.length <= maxCharacter) {
       localStorage.setItem('userPrompt', prompt);
     } else if (!prompt.trim()) {
-      localStorage.removeItem('userPrompt'); // Clear if empty
+      localStorage.removeItem('userPrompt');
     }
   }, 1000);
 
@@ -65,7 +72,11 @@ export const Form1 = () => {
   };
 
   const onSubmit = async () => {
-    await generateSubPillars();
+    if (mode === 'automatic') {
+      await generateSubPillars(true); // Pass true to indicate automatic mode
+    } else {
+      await generateSubPillars(false);
+    }
   };
 
   return (
@@ -101,15 +112,22 @@ export const Form1 = () => {
             </FormItem>
           )}
         />
-        <div className="flex justify-end gap-4">
-          <div>
+        <div className="flex justify-between items-center">
+          <div className="flex items-center space-x-2">
+            <Switch
+              checked={mode === 'automatic'}
+              onCheckedChange={(checked) => setMode(checked ? 'automatic' : 'custom')}
+            />
+            <span>{mode === 'automatic' ? 'Automatic Mode' : 'Custom Mode'}</span>
+          </div>
+          <div className="flex gap-4 items-center">
             <p className={cn('text-xs mt-1 text-right', getCharCountColor(userPrompt.length))}>
               {userPrompt.length}/{maxCharacter}
             </p>
+            <Button type="submit" disabled={isLoadingSubPillars}>
+              {isLoadingSubPillars ? 'Generating...' : mode === 'automatic' ? 'Generate Scripts' : 'Generate Sub-Pillars'}
+            </Button>
           </div>
-          <Button type="submit" disabled={isLoadingSubPillars}>
-            {isLoadingSubPillars ? 'Generating...' : 'Generate Sub-Pillars'}
-          </Button>
         </div>
       </form>
       <PromptHistoryDialog open={historyOpen} setOpen={setHistoryOpen} />
