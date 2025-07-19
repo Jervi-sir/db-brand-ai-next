@@ -1,14 +1,17 @@
-// app/(tools)/split-v2/api/generate-automatic-scripts/route.ts
 import { generateText } from 'ai';
 import { openai } from '@ai-sdk/openai';
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/app/(auth)/auth';
 import { db } from '@/lib/db/queries';
-import { generatedSplitHistory } from '@/lib/db/schema';
+import { generatedSplitHistory, user } from '@/lib/db/schema';
+import { eq } from 'drizzle-orm';
+
+// Force dynamic rendering for this route
+export const dynamic = 'force-dynamic';
 
 const API_CONFIG = {
-  MAX_TOKENS: 10000, // Reduced slightly to stay within likely model limits
-  TEMPERATURE: 1, // Consistent output
+  MAX_TOKENS: 10000,
+  TEMPERATURE: 1,
   MODEL: 'gpt-4.1-2025-04-14',
   MAX_RETRIES: 1,
 };
@@ -48,13 +51,13 @@ Return the response in JSON format:
     ...
   ]
 }
-Generate up to 6 scripts in this call. If you cannot generate 6 scripts due to token limits, include as many as possible (at least 10) and ensure the JSON is valid with proper closing brackets and no truncation. Each script should be concise (3-4 sentences) to maximize the number of scripts.
+Generate up to 6 scripts in this call. If you cannot generate 6 scripts due to token limits, include as many as possible (at least 10) and ensure the JSON is valid with proper closing brackets and no truncation. Each script should be concise (3-4 sentences).
 `;
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
     const session = await auth();
-    if (!session || !session.user || !session.user.id) {
+    if (!session || !session.user || !session.user.email) {
       return new Response('Unauthorized', { status: 401 });
     }
 
@@ -64,6 +67,19 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'User prompt is required' }, { status: 400 });
     }
 
+    // Fetch userId from user table based on session.user.email
+    const userRecord = await db
+      .select({ id: user.id })
+      .from(user)
+      .where(eq(user.email, session.user.email))
+      .limit(1);
+
+    if (!userRecord[0]) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    }
+
+    const userId = userRecord[0].id;
+
     let prompt = `${SYSTEM_PROMPT}\n\nUser Prompt: ${userPrompt}`;
     let responseData: any = {};
     let attempts = 0;
@@ -72,7 +88,7 @@ export async function POST(request: Request) {
       completionTokens: 0,
       totalTokens: 0,
     };
-    let cleanedText = ''; // Define outside try block
+    let cleanedText = '';
 
     while (attempts < API_CONFIG.MAX_RETRIES) {
       attempts++;
@@ -116,12 +132,12 @@ export async function POST(request: Request) {
         }
 
         console.log(`Generated ${responseData.scripts.length} scripts on attempt ${attempts}`);
-        break; // Exit retry loop if successful
+        break;
       } catch (parseError: any) {
         console.warn(`Attempt ${attempts} failed to parse AI response:`, parseError.message, 'Text:', cleanedText || 'No text available');
         if (attempts === API_CONFIG.MAX_RETRIES) {
           console.error('Max retries reached. Returning partial response if available.');
-          break; // Accept partial response on final attempt
+          break;
         }
         prompt = `${SYSTEM_PROMPT}\n\nUser Prompt: ${userPrompt}\nPrevious attempt failed: ${parseError.message}. Ensure valid JSON with clientPersona, contentPillar, 5 subPillars, and at least 10 scripts, complete with proper closing brackets and no truncation. Each script should be concise (3-4 sentences).`;
       }
@@ -137,11 +153,12 @@ export async function POST(request: Request) {
     const [historyEntry] = await db
       .insert(generatedSplitHistory)
       .values({
-        userId: session.user.id,
+        id: crypto.randomUUID(),
+        userId: userId, // Use userId from user table
         prompt: userPrompt,
         clientPersona: responseData.clientPersona || 'Unknown',
         contentPillar: responseData.contentPillar || 'Unknown',
-        subPillars: (responseData.subPillars || []).map((sp: string) => ({ value: sp, label: sp })),
+        subPillars: responseData.subPillars || [],
         chosenSubPillars: responseData.subPillars || [],
         hookType: [
           'fix-a-problem',
