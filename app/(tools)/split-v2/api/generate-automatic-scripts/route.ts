@@ -9,7 +9,7 @@ import { generatedSplitHistory } from '@/lib/db/schema';
 const API_CONFIG = {
   MAX_TOKENS: 10000, // Reduced slightly to stay within likely model limits
   TEMPERATURE: 1, // Consistent output
-  MODEL: 'gpt-4.1-nano-2025-04-14',
+  MODEL: 'gpt-4.1-2025-04-14',
   MAX_RETRIES: 1,
 };
 
@@ -20,7 +20,7 @@ Given a user prompt describing a business/creator context, niche, target audienc
 1. Generate a client persona (10-20 words in English).
 2. Generate a content pillar (a single overarching theme in Algerian Darja, 3-5 words).
 3. Generate 5 sub-pillars (specific content ideas in Algerian Darja, each 5-10 words).
-4. Generate up to 30 Instagram Reels scripts based on the sub-pillars and a predefined set of hook types.
+4. Generate up to 6 Instagram Reels scripts based on the sub-pillars and a predefined set of hook types.
 
 Each script must:
 - Be educational, actionable, and high-value.
@@ -48,7 +48,7 @@ Return the response in JSON format:
     ...
   ]
 }
-Generate up to 30 scripts in this call. If you cannot generate 30 scripts due to token limits, include as many as possible (at least 10) and ensure the JSON is valid with proper closing brackets and no truncation. Each script should be concise (3-4 sentences) to maximize the number of scripts.
+Generate up to 6 scripts in this call. If you cannot generate 6 scripts due to token limits, include as many as possible (at least 10) and ensure the JSON is valid with proper closing brackets and no truncation. Each script should be concise (3-4 sentences) to maximize the number of scripts.
 `;
 
 export async function POST(request: Request) {

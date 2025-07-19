@@ -9,7 +9,7 @@ import { generatedSplitHistory } from '@/lib/db/schema';
 const API_CONFIG = {
   MAX_TOKENS: 3000,
   TEMPERATURE: 1,
-  MODEL: 'gpt-4.1-nano-2025-04-14',
+  MODEL: 'gpt-4.1-2025-04-14',
   MAX_RETRIES: 3,
 };
 

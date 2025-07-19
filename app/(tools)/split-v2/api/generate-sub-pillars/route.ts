@@ -6,7 +6,7 @@ import { auth } from '@/app/(auth)/auth';
 const API_CONFIG = {
   MAX_TOKENS: 750,
   TEMPERATURE: 0.7,
-  MODEL: 'gpt-4.1-nano-2025-04-14',
+  MODEL: 'gpt-4.1-2025-04-14',
   MAX_RETRIES: 3,
 };
 

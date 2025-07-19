@@ -71,7 +71,7 @@ function PageContent() {
               </div>
             ) : scripts.length === 0 ? (
               <p className="text-gray-500 dark:text-gray-400">
-                No scripts generated yet. Fill out the form and click "Generate Scripts".
+                No scripts generated yet. Fill out the form and click &quot;Generate Scripts&quot;.
               </p>
             ) : (
               scripts.map((script, index) => (

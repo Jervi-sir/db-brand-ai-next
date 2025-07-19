@@ -38,11 +38,7 @@ export const Form2 = () => {
     mode,
   } = useScriptGenerator();
 
-  // Hide form in automatic mode
-  if (mode === 'automatic') {
-    return null;
-  }
-
+  // @ts-ignore
   const form = useForm<FormData>({
     defaultValues: {
       subPillars: selectedSubPillars,
@@ -59,6 +55,11 @@ export const Form2 = () => {
       return { values: data, errors };
     },
   });
+
+  // Hide form in automatic mode
+  if (mode === 'automatic') {
+    return null;
+  }
 
   const isFormDisabled = subPillars.length === 0 || selectedSubPillars.length === 0;
 
