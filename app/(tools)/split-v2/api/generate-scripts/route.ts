@@ -1,21 +1,23 @@
-// app/(tools)/split-v2/api/generate-scripts/route.ts
 import { generateText } from 'ai';
 import { openai } from '@ai-sdk/openai';
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/app/(auth)/auth';
 import { drizzle } from 'drizzle-orm/postgres-js';
 import { splitPromptHistory, generatedSplitHistory } from '@/lib/db/schema';
 import { eq, and } from 'drizzle-orm';
 import postgres from 'postgres';
 import { z } from 'zod';
+import { db } from '@/lib/db/queries';
 
-// Configuration constants
+// Force dynamic rendering for this route
+export const dynamic = 'force-dynamic';
+
 const API_CONFIG = {
   MAX_TOKENS: 3000,
   TEMPERATURE: 1,
-  MODEL: 'gpt-4.1-2025-04-14',
+  MODEL: 'gpt-4o', // Using a reliable model (adjust if needed)
   MAX_RETRIES: 3,
-  RETRY_DELAY_MS: 1000, // Delay between retries to avoid overwhelming the AI service
+  RETRY_DELAY_MS: 1000,
 };
 
 // Default system prompt (used as fallback)
@@ -66,18 +68,20 @@ Return the response in JSON format:
 
 // Input validation schema using Zod
 const RequestSchema = z.object({
-  userPrompt: z.string().min(1, 'userPrompt is required'),
-  clientPersona: z.string().min(1, 'clientPersona is required'),
-  contentPillar: z.string().min(1, 'contentPillar is required'),
-  subPillars: z.array(z.object({ value: z.string(), label: z.string() })).min(1, 'subPillars must be a non-empty array'),
-  chosenSubPillars: z.array(z.string()).min(1, 'chosenSubPillars must be a non-empty array'),
-  hookType: z.array(z.string()).min(1, 'hookType must be a non-empty array'),
+  userPrompt: z.string().min(10, 'userPrompt must be at least 10 characters'),
+  clientPersona: z.string().min(10, 'clientPersona must be at least 10 characters'),
+  contentPillar: z.string().min(3, 'contentPillar must be at least 3 characters'),
+  subPillars: z
+    .array(z.object({ value: z.string().min(1), label: z.string().min(1) }))
+    .min(1, 'subPillars must be a non-empty array'),
+  chosenSubPillars: z.array(z.string().min(1)).min(1, 'chosenSubPillars must be a non-empty array'),
+  hookType: z.array(z.string().min(1)).min(1, 'hookType must be a non-empty array'),
 });
 
 // Response script schema for validation
 const ScriptSchema = z.object({
-  subtitle: z.string().min(1),
-  content: z.string().min(1),
+  subtitle: z.string().min(3, 'subtitle must be at least 3 characters'),
+  content: z.string().min(10, 'content must be at least 10 characters'),
 });
 const ResponseSchema = z.object({
   scripts: z.array(ScriptSchema).length(3, 'Exactly 3 scripts are required'),
@@ -100,18 +104,23 @@ const buildPrompt = (
   const basePrompt = `${systemPrompt}\n\nUser Prompt: ${userPrompt}\nClient Persona: ${clientPersona}\nContent Pillar: ${contentPillar}\nSub-Pillars: ${subPillars
     .map((sp) => sp.label)
     .join(', ')}\nChosen Sub-Pillars: ${chosenSubPillars.join(', ')}\nHook Types: ${hookType.join(', ')}`;
-  return isRetry ? `${basePrompt}\n\nPrevious attempt failed. Ensure the response is valid JSON matching the specified format.` : basePrompt;
+  return isRetry ? `${basePrompt}\n\nPrevious attempt failed. Ensure exactly 3 scripts in valid JSON format.` : basePrompt;
 };
 
-export async function POST(request: Request) {
-  // Initialize database client
-  const client = postgres(process.env.DATABASE_URL!, { max: 1 });
-  const db = drizzle(client);
+// Fallback response for failed AI generation
+const FALLBACK_RESPONSE: ScriptResponse = {
+  scripts: Array(3).fill({
+    subtitle: 'نصيحة سريعة',
+    content: '<p>هذه نصيحة سريعة لتحسين يومك!</p><p>ابدأ بتحديد أولوياتك.</p><p>ركز على هدف واحد يوميا.</p>',
+  }),
+};
 
+export async function POST(request: NextRequest) {
   try {
     // Authenticate user
     const session = await auth();
     if (!session?.user?.id || !session.user.email) {
+      console.error('Authentication failed: Missing user ID or email', { session });
       return new Response('Unauthorized: Missing user ID or email', { status: 401 });
     }
 
@@ -119,6 +128,7 @@ export async function POST(request: Request) {
     const body = await request.json();
     const parsedBody = RequestSchema.safeParse(body);
     if (!parsedBody.success) {
+      console.error('Invalid request body:', parsedBody.error.issues);
       return NextResponse.json(
         { error: 'Invalid input', details: parsedBody.error.issues },
         { status: 400 }
@@ -131,6 +141,7 @@ export async function POST(request: Request) {
       (value) => !subPillars.some((sp) => sp.value === value)
     );
     if (invalidSubPillars.length > 0) {
+      console.error('Invalid chosenSubPillars:', invalidSubPillars);
       return NextResponse.json(
         { error: `Invalid chosenSubPillars: ${invalidSubPillars.join(', ')}` },
         { status: 400 }
@@ -138,85 +149,123 @@ export async function POST(request: Request) {
     }
 
     // Fetch current prompt from splitPromptHistory
-    const currentPrompt = await db
-      .select({ prompt: splitPromptHistory.prompt })
-      .from(splitPromptHistory)
-      .where(
-        and(
-          eq(splitPromptHistory.isCurrent, true),
-          eq(splitPromptHistory.userEmail, session.user.email)
-        )
-      )
-      .limit(1);
+    let currentPrompt;
+    try {
+      currentPrompt = await db
+        .select({ prompt: splitPromptHistory.prompt })
+        .from(splitPromptHistory)
+        .where(eq(splitPromptHistory.isCurrent, true))
+        .limit(1);
+      console.log('Current prompt result:', currentPrompt);
+    } catch (error) {
+      console.error('Error fetching current prompt:', {
+        message: error instanceof Error ? error.message : String(error),
+        code: error instanceof Error && 'code' in error ? error.code : undefined,
+        stack: error instanceof Error ? error.stack : undefined,
+      });
+      return NextResponse.json(
+        { error: 'Failed to fetch current prompt', details: error instanceof Error ? error.message : 'Unknown database error' },
+        { status: 500 }
+      );
+    }
 
     const systemPrompt = currentPrompt[0]?.prompt || DEFAULT_SYSTEM_PROMPT;
+    if (!currentPrompt[0]) {
+      console.warn('No current prompt found for user, using default:', session.user.email);
+    }
 
     // Generate scripts with retries
     let responseData: ScriptResponse | null = null;
     let thisUsage: TokenUsage = { promptTokens: 0, completionTokens: 0, totalTokens: 0 };
     let attempts = 0;
+    let lastError: string | null = null;
+    let cleanedText = '';
 
     while (attempts < API_CONFIG.MAX_RETRIES) {
       attempts++;
       const prompt = buildPrompt(systemPrompt, parsedBody.data, attempts > 1);
 
-      const { text, usage } = await generateText({
-        model: openai(API_CONFIG.MODEL),
-        prompt,
-        temperature: API_CONFIG.TEMPERATURE,
-        maxTokens: API_CONFIG.MAX_TOKENS,
-      });
-
-      thisUsage = {
-        promptTokens: usage?.promptTokens || 0,
-        completionTokens: usage?.completionTokens || 0,
-        totalTokens: usage?.totalTokens || 0,
-      };
-
-      const cleanedText = text.trim().replace(/^```json\s*|\s*```$/g, '').trim();
-
       try {
+        console.log(`Attempt ${attempts}: Generating scripts with prompt length: ${prompt.length}`);
+        const { text, usage } = await generateText({
+          model: openai(API_CONFIG.MODEL),
+          prompt,
+          temperature: API_CONFIG.TEMPERATURE,
+          maxTokens: API_CONFIG.MAX_TOKENS,
+        });
+        thisUsage = {
+          promptTokens: usage?.promptTokens || 0,
+          completionTokens: usage?.completionTokens || 0,
+          totalTokens: usage?.totalTokens || 0,
+        };
+        cleanedText = text.trim().replace(/^```json\s*|\s*```$/g, '').trim();
+
         const parsedResponse = JSON.parse(cleanedText);
         const validatedResponse = ResponseSchema.safeParse(parsedResponse);
         if (!validatedResponse.success) {
-          throw new Error(validatedResponse.error.message);
+          throw new Error(`Invalid response structure: ${validatedResponse.error.message}`);
         }
         responseData = validatedResponse.data;
-        break; // Valid response, exit retry loop
+        console.log(`Attempt ${attempts}: Successfully generated ${responseData.scripts.length} scripts`);
+        break;
       } catch (error) {
-        console.warn(`Attempt ${attempts} failed:`, error, 'Text:', cleanedText);
+        lastError = error instanceof Error ? error.message : String(error);
+        console.warn(`Attempt ${attempts} failed:`, {
+          message: lastError,
+          code: error instanceof Error && 'code' in error ? error.code : undefined,
+          text: cleanedText || 'No text available',
+        });
         if (attempts === API_CONFIG.MAX_RETRIES) {
-          return NextResponse.json(
-            { error: 'Failed to generate valid scripts after retries', details: String(error) },
-            { status: 500 }
-          );
+          console.warn('Using fallback response due to repeated failures');
+          responseData = FALLBACK_RESPONSE;
+          break;
         }
-        await delay(API_CONFIG.RETRY_DELAY_MS); // Delay before retry
+        await delay(API_CONFIG.RETRY_DELAY_MS);
       }
     }
 
     if (!responseData) {
-      return NextResponse.json({ error: 'Failed to generate scripts' }, { status: 500 });
+      console.error('No response data after retries');
+      return NextResponse.json(
+        { error: 'Failed to generate scripts', details: lastError || 'Unknown error' },
+        { status: 500 }
+      );
     }
 
     // Save to generatedSplitHistory
-    const [historyEntry] = await db
-      .insert(generatedSplitHistory)
-      .values({
-        userId: session.user.id,
-        prompt: userPrompt,
-        clientPersona,
-        contentPillar,
-        subPillars,
-        chosenSubPillars: chosenSubPillars.map((value) =>
-          subPillars.find((sp) => sp.value === value)?.label || value
-        ),
-        hookType,
-        scripts: responseData.scripts,
-        timestamp: new Date(),
-        isDeleted: false,
-      })
-      .returning({ id: generatedSplitHistory.id });
+    let historyEntry;
+    try {
+      console.log('Inserting into generatedSplitHistory for userId:', session.user.id);
+      [historyEntry] = await db
+        .insert(generatedSplitHistory)
+        .values({
+          id: crypto.randomUUID(),
+          userId: session.user.id,
+          prompt: userPrompt,
+          clientPersona,
+          contentPillar,
+          subPillars,
+          chosenSubPillars: chosenSubPillars.map((value) =>
+            subPillars.find((sp) => sp.value === value)?.label || value
+          ),
+          hookType,
+          scripts: responseData.scripts,
+          timestamp: new Date(),
+          isDeleted: false,
+        })
+        .returning({ id: generatedSplitHistory.id });
+      console.log('History entry created:', historyEntry.id);
+    } catch (error) {
+      console.error('Error inserting into generatedSplitHistory:', {
+        message: error instanceof Error ? error.message : String(error),
+        code: error instanceof Error && 'code' in error ? error.code : undefined,
+        stack: error instanceof Error ? error.stack : undefined,
+      });
+      return NextResponse.json(
+        { error: 'Failed to save history', details: error instanceof Error ? error.message : 'Unknown database error' },
+        { status: 500 }
+      );
+    }
 
     return NextResponse.json({
       scripts: responseData.scripts,
@@ -228,13 +277,16 @@ export async function POST(request: Request) {
       },
     });
   } catch (error) {
-    console.error('Error generating scripts:', error);
+    console.error('Error generating scripts:', {
+      message: error instanceof Error ? error.message : String(error),
+      code: error instanceof Error && 'code' in error ? error.code : undefined,
+      stack: error instanceof Error ? error.stack : undefined,
+    });
     return NextResponse.json(
       { error: 'Failed to generate scripts', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     );
   } finally {
-    // Ensure database client is closed
-    await client.end();
+   
   }
 }

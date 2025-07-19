@@ -125,7 +125,7 @@ export const Form1 = () => {
               {userPrompt.length}/{maxCharacter}
             </p>
             <Button type="submit" disabled={isLoadingSubPillars}>
-              {isLoadingSubPillars ? 'Generating...' : mode === 'automatic' ? 'Generate Scripts' : 'Generate Sub-Pillars'}
+              {isLoadingSubPillars ? 'Generating...' : mode === 'automatic' ? 'Generate Scripts Auto' : 'Generate Sub-Pillars'}
             </Button>
           </div>
         </div>
