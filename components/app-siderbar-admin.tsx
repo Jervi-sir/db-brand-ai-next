@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Bot, ChartArea, Code2, Command, HistoryIcon, Settings2, SquareTerminal, TowerControlIcon, Unlock, X, } from "lucide-react"
+import { Bot, ChartArea, Code2, Command, HistoryIcon, Settings2, SplitIcon, SplitSquareHorizontal, SquareTerminal, TowerControlIcon, Unlock, X, } from "lucide-react"
 
 import { 
   Sidebar, SidebarContent, SidebarFooter, SidebarHeader, useSidebar, 
@@ -46,6 +46,11 @@ const data = {
       title: "Unlocking Codes",
       url: "/dashboard/unlocking-codes",
       icon: Unlock,
+    },
+    {
+      title: "Split 2",
+      url: "/dashboard/ai-split-2-prompt",
+      icon: SplitSquareHorizontal,
     },
   ],
 

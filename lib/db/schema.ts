@@ -310,3 +310,12 @@ export const generatedSplitHistory = pgTable('GeneratedSplitHistory', {
   isDeleted: boolean('is_deleted').notNull().default(false),
 });
 
+export const splitPromptHistory = pgTable('SplitPromptHistory', {
+  id: uuid('id').primaryKey().notNull().defaultRandom(),
+  modelId: uuid('modelId').notNull().references(() => aiModel.id, { onDelete: 'cascade' }),
+  prompt: text('prompt').notNull(),
+  createdAt: timestamp('createdAt').notNull().defaultNow(),
+  updatedAt: timestamp('updatedAt').notNull().defaultNow(),
+  userEmail: varchar('userEmail', { length: 128 }), // Optional, for user tracking
+  isCurrent: boolean('isCurrent').notNull().default(false), // Flag to mark the current prompt
+});

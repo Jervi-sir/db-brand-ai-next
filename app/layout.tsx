@@ -47,11 +47,11 @@ export default async function RootLayout({
             __html: THEME_COLOR_SCRIPT,
           }}
         />
-         <script
+         {/* <script
           dangerouslySetInnerHTML={{
             __html: IN_APP_BROWSER_REDIRECT_SCRIPT,
           }}
-        />
+        /> */}
       </head>
       <body className="subpixel-antialiased">
         <ThemeProvider
