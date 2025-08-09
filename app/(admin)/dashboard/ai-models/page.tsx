@@ -19,6 +19,12 @@ const modelOptions = [
   { name: "gpt-4.1-2025-04-14", inputPrice: 2.00, outputPrice: 8.00, cachedInputPrice: 0.00 },
   { name: "gpt-4o-2024-11-20", inputPrice: 2.50, outputPrice: 10.00, cachedInputPrice: 0.00 },
   { name: "gpt-4o-mini-2024-07-18", inputPrice: 0.15, outputPrice: 0.60, cachedInputPrice: 0.00 },
+
+  { name: "gpt-5-2025-08-07", inputPrice: 1.25, outputPrice: 10, cachedInputPrice: 0.125 },
+  { name: "gpt-5-chat-latest", inputPrice: 1.25, outputPrice: 10, cachedInputPrice: 0.125 },
+
+  { name: "gpt-5-mini-2025-08-07", inputPrice: 0.25, outputPrice: 2.00, cachedInputPrice: 0.025 },
+  { name: "gpt-5-nano-2025-08-07", inputPrice: 0.05, outputPrice: 0.4, cachedInputPrice: 0.005 },
   // { name: "chatgpt-4o-latest", inputPrice: 5.00, outputPrice: 15.00, cachedInputPrice: 0.00 }
 ];
 

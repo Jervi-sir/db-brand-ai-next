@@ -25,12 +25,7 @@ export async function GET(request: NextRequest) {
       })
       .from(splitPromptHistory)
       .leftJoin(aiModel, eq(splitPromptHistory.modelId, aiModel.id))
-      .where(
-        and(
-          eq(splitPromptHistory.isCurrent, true),
-          eq(splitPromptHistory.userEmail, session.user.email)
-        )
-      )
+      .where(eq(splitPromptHistory.isCurrent, true))
       .limit(1);
 
     // Fetch history
@@ -41,12 +36,7 @@ export async function GET(request: NextRequest) {
       })
       .from(splitPromptHistory)
       .leftJoin(aiModel, eq(splitPromptHistory.modelId, aiModel.id))
-      .where(
-        and(
-          modelId !== 'all' ? eq(splitPromptHistory.modelId, modelId) : undefined,
-          eq(splitPromptHistory.userEmail, session.user.email)
-        )
-      )
+      .where(modelId !== 'all' ? eq(splitPromptHistory.modelId, modelId) : undefined)
       .orderBy(desc(splitPromptHistory.createdAt))
       .offset((page - 1) * perPage)
       .limit(perPage);
@@ -54,12 +44,7 @@ export async function GET(request: NextRequest) {
     const totalCount = await db
       .select({ count: sql`count(*)`.as('count') })
       .from(splitPromptHistory)
-      .where(
-        and(
-          modelId !== 'all' ? eq(splitPromptHistory.modelId, modelId) : undefined,
-          eq(splitPromptHistory.userEmail, session.user.email)
-        )
-      );
+      .where(modelId !== 'all' ? eq(splitPromptHistory.modelId, modelId) : undefined);
 
     const history = await historyQuery;
     const total = Number(totalCount[0].count);
@@ -98,12 +83,7 @@ export async function POST(request: NextRequest) {
     await db
       .update(splitPromptHistory)
       .set({ isCurrent: false })
-      .where(
-        and(
-          eq(splitPromptHistory.isCurrent, true),
-          eq(splitPromptHistory.userEmail, session.user.email)
-        )
-      );
+      .where(eq(splitPromptHistory.isCurrent, true));
 
     // Insert new prompt
     const newPrompt = await db
@@ -153,12 +133,7 @@ export async function PUT(request: NextRequest) {
     await db
       .update(splitPromptHistory)
       .set({ isCurrent: false })
-      .where(
-        and(
-          eq(splitPromptHistory.isCurrent, true),
-          eq(splitPromptHistory.userEmail, session.user.email)
-        )
-      );
+      .where(eq(splitPromptHistory.isCurrent, true));
 
     // Update the specified prompt
     const updatedPrompt = await db

@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbo",
+    "dev": "next dev -p 3002 --turbo",
     "build": "tsx lib/db/migrate && next build && pm2 reload dr-ai",
     "start": "next start -p 3003",
     "lint": "next lint && biome lint --write --unsafe",

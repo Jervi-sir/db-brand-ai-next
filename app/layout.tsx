@@ -18,7 +18,7 @@ import { ThemeProvider } from '@/components/theme-provider';
 import './globals.css';
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://ai.ammiteboune.com'),
+  metadataBase: new URL('https://huntproducts.online/'),
   title: 'Dr Brand ai',
   description: 'Dr Brand ai Here.',
 };
