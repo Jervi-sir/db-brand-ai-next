@@ -1,4 +1,3 @@
-// app/(admin)/dashboard/ai-split-2-prompt/page.tsx
 'use client';
 import React, { useState, useEffect } from 'react';
 import {
@@ -38,7 +37,8 @@ import { Textarea } from '@/components/ui/textarea';
 
 interface PromptHistory {
   id: string;
-  modelId: string;
+  modelId: string | null;
+  modelCodeName: string | null;
   prompt: string;
   createdAt: string;
   updatedAt: string;
@@ -46,17 +46,15 @@ interface PromptHistory {
   isCurrent: boolean;
 }
 
-interface AIModel {
-  id: string;
+interface ModelOption {
   name: string;
-  displayName?: string;
-  provider: string;
-  isActive: boolean;
+  inputPrice: number;
+  outputPrice: number;
+  cachedInputPrice: number;
 }
 
 interface HistoryEntry {
   promptHistory: PromptHistory;
-  aiModel: AIModel | null;
 }
 
 interface Pagination {
@@ -68,25 +66,35 @@ interface Pagination {
   next_page_url: string | null;
 }
 
+const modelOptions: ModelOption[] = [
+  { name: "gpt-4.1-nano-2025-04-14", inputPrice: 0.10, outputPrice: 0.40, cachedInputPrice: 0.00 },
+  { name: "gpt-4.1-mini-2025-04-14", inputPrice: 0.40, outputPrice: 1.60, cachedInputPrice: 0.00 },
+  { name: "gpt-4.1-2025-04-14", inputPrice: 2.00, outputPrice: 8.00, cachedInputPrice: 0.00 },
+  { name: "gpt-4o-2024-11-20", inputPrice: 2.50, outputPrice: 10.00, cachedInputPrice: 0.00 },
+  { name: "gpt-4o-mini-2024-07-18", inputPrice: 0.15, outputPrice: 0.60, cachedInputPrice: 0.00 },
+  { name: "gpt-5-2025-08-07", inputPrice: 1.25, outputPrice: 10, cachedInputPrice: 0.125 },
+  { name: "gpt-5-chat-latest", inputPrice: 1.25, outputPrice: 10, cachedInputPrice: 0.125 },
+  { name: "gpt-5-mini-2025-08-07", inputPrice: 0.25, outputPrice: 2.00, cachedInputPrice: 0.025 },
+  { name: "gpt-5-nano-2025-08-07", inputPrice: 0.05, outputPrice: 0.4, cachedInputPrice: 0.005 },
+];
+
 export default function SplitPromptHistoryPage() {
   const [currentPrompt, setCurrentPrompt] = useState<HistoryEntry | null>(null);
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [pagination, setPagination] = useState<Pagination | null>(null);
   const [selectedPrompt, setSelectedPrompt] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [models, setModels] = useState<AIModel[]>([]);
   const [selectedModel, setSelectedModel] = useState<string>('all');
   const [promptText, setPromptText] = useState<string>('');
-  const [promptModelId, setPromptModelId] = useState<string>('');
+  const [promptModelName, setPromptModelName] = useState<string>('');
   const [isEditMode, setIsEditMode] = useState<boolean>(false);
   const [editingPromptId, setEditingPromptId] = useState<string | null>(null);
 
-
   // Fetch prompt history and current prompt
-  const fetchHistory = async (page: number = 1, modelId: string = 'all') => {
+  const fetchHistory = async (page: number = 1, modelName: string = 'all') => {
     setIsLoading(true);
     try {
-      const url = `/api/split-prompt-history?page=${page}&per_page=10${modelId !== 'all' ? `&modelId=${modelId}` : ''}`;
+      const url = `/api/split-prompt-history?page=${page}&per_page=10${modelName !== 'all' ? `&modelCodeName=${modelName}` : ''}`;
       const response = await fetch(url);
       if (!response.ok) throw new Error('Failed to fetch history');
       const data = await response.json();
@@ -94,7 +102,7 @@ export default function SplitPromptHistoryPage() {
       setHistory(data.history);
       setPagination(data.pagination);
       setPromptText(data.current?.promptHistory.prompt || '');
-      setPromptModelId(data.current?.promptHistory.modelId || '');
+      setPromptModelName(data.current?.promptHistory.modelCodeName || '');
     } catch (error) {
       console.error('Error fetching split prompt history:', error);
       toast('Error fetching prompt history');
@@ -103,22 +111,9 @@ export default function SplitPromptHistoryPage() {
     }
   };
 
-  // Fetch models
-  const fetchModels = async () => {
-    try {
-      const response = await fetch('/api/ai-models'); // Assume you have an endpoint for models
-      if (!response.ok) throw new Error('Failed to fetch models');
-      const data = await response.json();
-      setModels(data);
-    } catch (error) {
-      console.error('Error fetching models:', error);
-      toast('Error fetching models');
-    }
-  };
-
   // Handle saving new prompt
   const handleSavePrompt = async () => {
-    if (!promptText || !promptModelId) {
+    if (!promptText || !promptModelName) {
       toast('Please provide a prompt and select a model');
       return;
     }
@@ -128,8 +123,8 @@ export default function SplitPromptHistoryPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           prompt: promptText,
-          modelId: promptModelId,
-          userEmail: 'user@example.com', // Replace with actual user email
+          modelCodeName: promptModelName,
+          userEmail: 'user@example.com',
         }),
       });
       if (!response.ok) throw new Error('Failed to save prompt');
@@ -143,7 +138,7 @@ export default function SplitPromptHistoryPage() {
 
   // Handle updating current prompt
   const handleUpdatePrompt = async () => {
-    if (!promptText || !promptModelId) {
+    if (!promptText || !promptModelName) {
       toast('Please provide a prompt and select a model');
       return;
     }
@@ -153,8 +148,8 @@ export default function SplitPromptHistoryPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           prompt: promptText,
-          modelId: promptModelId,
-          userEmail: 'user@example.com', // Replace with actual user email
+          modelCodeName: promptModelName,
+          userEmail: 'user@example.com',
         }),
       });
       if (!response.ok) throw new Error('Failed to save updated prompt');
@@ -180,9 +175,9 @@ export default function SplitPromptHistoryPage() {
       });
       if (!response.ok) throw new Error('Failed to set prompt as current');
       toast('Prompt set as current successfully');
-      setIsEditMode(false); // Exit edit mode if active
+      setIsEditMode(false);
       setEditingPromptId(null);
-      fetchHistory(1, selectedModel); // Refresh history to update current prompt
+      fetchHistory(1, selectedModel);
     } catch (error) {
       console.error('Error setting prompt as current:', error);
       toast('Error setting prompt as current');
@@ -215,7 +210,6 @@ export default function SplitPromptHistoryPage() {
   // Fetch data on mount
   useEffect(() => {
     fetchHistory();
-    fetchModels();
   }, []);
 
   return (
@@ -234,14 +228,14 @@ export default function SplitPromptHistoryPage() {
           <div className="space-y-4">
             <div>
               <Label htmlFor="model">Model</Label>
-              <Select value={promptModelId} onValueChange={setPromptModelId} disabled={!isEditMode}>
+              <Select value={promptModelName} onValueChange={setPromptModelName} disabled={!isEditMode}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select a model" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
-                    {models.map((model) => (
-                      <SelectItem key={model.id} value={model.id}>
+                    {modelOptions.map((model) => (
+                      <SelectItem key={model.name} value={model.name}>
                         {model.name}
                       </SelectItem>
                     ))}
@@ -281,7 +275,7 @@ export default function SplitPromptHistoryPage() {
                   onClick={() => {
                     setIsEditMode(false);
                     setPromptText(currentPrompt?.promptHistory.prompt || '');
-                    setPromptModelId(currentPrompt?.promptHistory.modelId || '');
+                    setPromptModelName(currentPrompt?.promptHistory.modelCodeName || '');
                   }}
                 >
                   Cancel
@@ -297,8 +291,6 @@ export default function SplitPromptHistoryPage() {
             </div>
           </div>
         </div>
-
-
 
         {/* History Table */}
         <div>
@@ -318,8 +310,8 @@ export default function SplitPromptHistoryPage() {
               <SelectContent>
                 <SelectGroup>
                   <SelectItem value="all">All Models</SelectItem>
-                  {models.map((model) => (
-                    <SelectItem key={model.id} value={model.id}>
+                  {modelOptions.map((model) => (
+                    <SelectItem key={model.name} value={model.name}>
                       {model.name}
                     </SelectItem>
                   ))}
@@ -378,7 +370,7 @@ export default function SplitPromptHistoryPage() {
                       )}
                     </TableCell>
                     <TableCell className="max-w-[120px] truncate">
-                      {item.aiModel?.name || 'N/A'}
+                      {item.promptHistory.modelCodeName || 'N/A'}
                     </TableCell>
                     <TableCell>{new Date(item.promptHistory.createdAt).toLocaleString()}</TableCell>
                     <TableCell>{new Date(item.promptHistory.updatedAt).toLocaleString()}</TableCell>

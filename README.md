@@ -59,6 +59,10 @@ This template ships with OpenAI `gpt-4o` as the default. However, with the [AI S
 2. `npx next run -p 3001`
 3. or use `pm2 start npm --name "dr-ai" -- start`
 
+### update the db 
+1. npx drizzle-kit generate
+2. npx drizzle-kit migrate
+
 ### WYSIWYG
 https://github.com/JefMari/awesome-wysiwyg-editors
 https://shadcn-minimal-tiptap.vercel.app/

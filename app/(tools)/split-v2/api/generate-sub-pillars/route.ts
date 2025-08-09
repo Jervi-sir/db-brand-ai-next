@@ -61,7 +61,7 @@ export async function POST(request: Request) {
     while (attempts < API_CONFIG.MAX_RETRIES) {
       attempts++;
       const { text } = await generateText({
-        model: openai(API_CONFIG.MODEL),
+        model: openai('gpt-5-nano-2025-08-07'),
         prompt,
         temperature: API_CONFIG.TEMPERATURE,
         maxTokens: API_CONFIG.MAX_TOKENS,

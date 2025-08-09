@@ -163,13 +163,13 @@ export async function POST(request: NextRequest) {
     // Fetch userId from user table
     let userRecord;
     try {
-      console.log('Fetching userId for email:', session.user.email);
+      // console.log('Fetching userId for email:', session.user.email);
       userRecord = await db
         .select({ id: user.id })
         .from(user)
         .where(eq(user.email, session.user.email))
         .limit(1);
-      console.log('User record:', userRecord);
+      // console.log('User record:', userRecord);
     } catch (error) {
       console.error('Error fetching user:', {
         message: error instanceof Error ? error.message : String(error),
@@ -193,11 +193,11 @@ export async function POST(request: NextRequest) {
     try {
       console.log('Fetching current prompt with isCurrent: true');
       currentPrompt = await db
-        .select({ prompt: splitPromptHistory.prompt })
+        .select({ prompt: splitPromptHistory.prompt, modelCodeName: splitPromptHistory.modelCodeName })
         .from(splitPromptHistory)
         .where(eq(splitPromptHistory.isCurrent, true))
         .limit(1);
-      console.log('Current prompt result:', currentPrompt);
+      // console.log('Current prompt result:', currentPrompt);
     } catch (error) {
       console.error('Error fetching current prompt:', {
         message: error instanceof Error ? error.message : String(error),
@@ -236,7 +236,7 @@ export async function POST(request: NextRequest) {
 
       try {
         const { text, usage } = await generateText({
-          model: openai(API_CONFIG.MODEL),
+          model: openai(currentPrompt[0]?.modelCodeName || 'gpt-4o-mini-2024-07-18'),
           prompt,
           temperature: API_CONFIG.TEMPERATURE,
           maxTokens: API_CONFIG.MAX_TOKENS,

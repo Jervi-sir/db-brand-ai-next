@@ -152,7 +152,7 @@ export async function POST(request: NextRequest) {
     let currentPrompt;
     try {
       currentPrompt = await db
-        .select({ prompt: splitPromptHistory.prompt })
+        .select({ prompt: splitPromptHistory.prompt, modelCodeName: splitPromptHistory.modelCodeName })
         .from(splitPromptHistory)
         .where(eq(splitPromptHistory.isCurrent, true))
         .limit(1);
@@ -188,7 +188,7 @@ export async function POST(request: NextRequest) {
       try {
         console.log(`Attempt ${attempts}: Generating scripts with prompt length: ${prompt.length}`);
         const { text, usage } = await generateText({
-          model: openai(API_CONFIG.MODEL),
+          model: openai(currentPrompt[0]?.modelCodeName || 'gpt-4o-mini-2024-07-18'),
           prompt,
           temperature: API_CONFIG.TEMPERATURE,
           maxTokens: API_CONFIG.MAX_TOKENS,

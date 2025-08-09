@@ -312,7 +312,8 @@ export const generatedSplitHistory = pgTable('GeneratedSplitHistory', {
 
 export const splitPromptHistory = pgTable('SplitPromptHistory', {
   id: uuid('id').primaryKey().notNull().defaultRandom(),
-  modelId: uuid('modelId').notNull().references(() => aiModel.id, { onDelete: 'cascade' }),
+  modelId: uuid('modelId').references(() => aiModel.id, { onDelete: 'cascade' }), // Removed notNull() to make it nullable
+  modelCodeName: varchar('modelCodeName', { length: 128 }), // Added new column
   prompt: text('prompt').notNull(),
   createdAt: timestamp('createdAt').notNull().defaultNow(),
   updatedAt: timestamp('updatedAt').notNull().defaultNow(),
